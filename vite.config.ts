@@ -17,7 +17,7 @@ function figmaAssetResolver() {
 
 export default defineConfig({
   // Required for GitHub Pages
-  base: '/rogie-alysssa/',
+  base: '/rogie-alyssa/',
 
   plugins: [
     figmaAssetResolver(),
