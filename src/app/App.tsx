@@ -5,8 +5,9 @@ import {
   MapPin, Clock, Heart, X, Check, ChevronRight, ChevronLeft,
   Calendar, Users, Star, Search, Filter, Download, Trash2,
   CheckCircle, XCircle, Clock3, LayoutDashboard, LogOut, Eye,
-  Mail, UserCheck, UserX, RefreshCw,
+  Mail, UserCheck, UserX, RefreshCw, User,
 } from "lucide-react";
+import { fetchRsvps, createRsvp, updateRsvpStatus, deleteRsvp as deleteRsvpDb, markAsInvited } from "../lib/database";
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const WEDDING_DATE = new Date("2026-11-28T16:00:00");
@@ -29,9 +30,9 @@ const GALLERY: GalleryItem[] = [
   { url: "/images/1a.jpg", alt: "Couple portrait", span: "lg:col-span-2 lg:row-span-2" },
   { url: "/images/4a.JPG", alt: "Smiling guests", span: "lg:col-span-1 lg:row-span-1" },
   { url: "/images/5a.JPG", alt: "Ceremony moment", span: "lg:col-span-1 lg:row-span-1" },
-  { url: "/images/5a.jpeg", alt: "Ceremony moment", span: "lg:col-span-1 lg:row-span-1" },
+  { url: "/images/5b.JPG", alt: "Ceremony moment", span: "lg:col-span-1 lg:row-span-1" },
   { url: "/images/2a.JPG", alt: "Reception scene", span: "lg:col-span-1 lg:row-span-1" },
-  { url: "/images/3a.png", alt: "Wedding invitation", span: "lg:col-span-1 lg:row-span-1" },
+  { url: "/images/3b.jpg", alt: "Wedding invitation", span: "lg:col-span-1 lg:row-span-1" },
   { url: "/images/6a.JPG", alt: "Couple close-up", span: "lg:col-span-2 lg:row-span-2" },
   { url: "/images/7a.JPG", alt: "Wedding venue", span: "lg:col-span-1 lg:row-span-1" },
   { url: "/images/8a.JPG", alt: "Wedding details", span: "lg:col-span-1 lg:row-span-1" },
@@ -77,9 +78,6 @@ interface RsvpEntry {
   status: RsvpStatus; submittedAt: string;
   invited?: boolean;
 }
-
-const SEED_RSVPS: RsvpEntry[] = [
- ];
 
 // ─── Shared Helpers ───────────────────────────────────────────────────────────
 
@@ -144,6 +142,67 @@ function FlowerIcon() {
       <path d="M9 15.5L11 11.5" />
       <path d="M15 15.5L13 11.5" />
       <path d="M11 21V14" />
+    </svg>
+  );
+}
+
+function CandleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M10 2L10 4" />
+      <path d="M14 2L14 4" />
+      <path d="M10 4H14V8C14 12 12 15 12 18H10C10 15 8 12 8 8V4H10Z" />
+      <path d="M11 2.5C11 1.67157 11.6716 1 12.5 1C13.3284 1 14 1.67157 14 2.5" />
+      <path d="M11 2.5L13 2.5" />
+    </svg>
+  );
+}
+
+function CordIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M3 8L12 3L21 8" />
+      <path d="M3 16L12 21L21 16" />
+      <path d="M12 3V21" />
+      <path d="M3 8V16" />
+      <path d="M21 8V16" />
+    </svg>
+  );
+}
+
+function VeilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M12 2C12 2 6 4 6 8C6 12 12 18 12 18C12 18 18 12 18 8C18 4 12 2 12 2" />
+      <path d="M12 2L18 8" />
+      <path d="M12 2L6 8" />
+      <path d="M8 10L16 10" />
+      <path d="M8 14L16 14" />
+    </svg>
+  );
+}
+
+function CoinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8 12L16 12" />
+      <path d="M12 8L12 16" />
+      <path d="M9 10L15 14" />
+    </svg>
+  );
+}
+
+function BibleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <path d="M4 4H20V20H4Z" />
+      <path d="M6 4V20" />
+      <path d="M18 4V20" />
+      <path d="M8 8H16" />
+      <path d="M8 12H14" />
+      <path d="M8 16H12" />
+      <path d="M12 2V4" />
     </svg>
   );
 }
@@ -445,8 +504,9 @@ function AdminLogin({ onLogin, onClose }: { onLogin: () => void; onClose: () => 
           <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: "linear-gradient(135deg, #4275C8, #A8C7F1)" }}>
             <LayoutDashboard size={20} color="white" />
           </div>
-          <h2 className="text-2xl" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>Admin Access</h2>
-          <p className="text-xs mt-1" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>Enter your password to continue</p>
+          <h2 className="text-2xl" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>Wedding Admin</h2>
+          <p className="text-xs mt-1" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>{GROOM} & {BRIDE}</p>
+          <p className="text-xs mt-2" style={{ fontFamily: "'Montserrat', sans-serif", color: "#9BB7E0" }}>Enter password to manage RSVPs</p>
         </div>
         <input
           type="password" value={pw} onChange={(e) => setPw(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()}
@@ -458,7 +518,6 @@ function AdminLogin({ onLogin, onClose }: { onLogin: () => void; onClose: () => 
         <button onClick={submit} className="w-full py-3 rounded-xl text-sm transition-all hover:scale-[1.02]" style={{ fontFamily: "'Montserrat', sans-serif", background: "linear-gradient(135deg, #4275C8, #A8C7F1)", color: "white", boxShadow: "0 4px 16px rgba(66,117,200,0.3)" }}>
           Sign In
         </button>
-        <p className="text-center text-xs mt-3" style={{ fontFamily: "'Montserrat', sans-serif", color: "#9BB7E0" }}>Hint: admin2026</p>
       </motion.div>
     </div>
   );
@@ -470,13 +529,14 @@ function AdminDashboard({ rsvps, onUpdate, onDelete, onInvite, onClose }: {
   rsvps: RsvpEntry[];
   onUpdate: (id: number, status: RsvpStatus) => void;
   onDelete: (id: number) => void;
-  onInvite: (email: string) => void;
+  onInvite: (payload: { email: string; name: string }) => void;
   onClose: () => void;
 }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | RsvpStatus>("all");
   const [selected, setSelected] = useState<RsvpEntry | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteName, setInviteName] = useState("");
   const [inviteMessage, setInviteMessage] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "status" | "guests" | "invited">("status");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -505,13 +565,15 @@ function AdminDashboard({ rsvps, onUpdate, onDelete, onInvite, onClose }: {
 
   const handleInvite = () => {
     const email = inviteEmail.trim().toLowerCase();
+    const name = inviteName.trim();
     if (!email) {
       setInviteMessage("Enter an email address to invite.");
       return;
     }
-    onInvite(email);
+    onInvite({ email, name });
     setInviteEmail("");
-    setInviteMessage(`Invitation sent to ${email}`);
+    setInviteName("");
+    setInviteMessage(`Invitation sent to ${name || email}`);
     setTimeout(() => setInviteMessage(""), 5000);
   };
 
@@ -585,7 +647,7 @@ function AdminDashboard({ rsvps, onUpdate, onDelete, onInvite, onClose }: {
           </div>
           <div>
             <p className="text-sm font-semibold" style={{ color: "#1F2D4C" }}>Admin Dashboard</p>
-            <p className="text-xs" style={{ color: "#6B7C9D" }}>Sophia &amp; Ethan — Dec 20, 2026</p>
+            <p className="text-xs" style={{ color: "#6B7C9D" }}>Rogimer &amp; Alyssa Camille — November 28, 2026</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -632,9 +694,15 @@ function AdminDashboard({ rsvps, onUpdate, onDelete, onInvite, onClose }: {
           </div>
           <div className="p-5 border-b border-[rgba(66,117,200,0.08)] bg-slate-50">
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-              <div className="relative flex-1 min-w-[220px]">
-                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#6B7C9D" }} />
-                <input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="Enter email address to invite" className="pl-10 pr-4 py-3 rounded-2xl w-full text-xs outline-none" style={{ background: "rgba(255,255,255,0.95)", border: "1px solid rgba(66,117,200,0.16)", color: "#1F2D4C", fontFamily: "'Montserrat', sans-serif" }} />
+              <div className="flex flex-col gap-3 flex-1 min-w-[220px]">
+                <div className="relative">
+                  <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#6B7C9D" }} />
+                  <input value={inviteName} onChange={(e) => setInviteName(e.target.value)} placeholder="Guest name (optional)" className="pl-10 pr-4 py-3 rounded-2xl w-full text-xs outline-none" style={{ background: "rgba(255,255,255,0.95)", border: "1px solid rgba(66,117,200,0.16)", color: "#1F2D4C", fontFamily: "'Montserrat', sans-serif" }} />
+                </div>
+                <div className="relative">
+                  <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#6B7C9D" }} />
+                  <input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="Enter email address to invite" className="pl-10 pr-4 py-3 rounded-2xl w-full text-xs outline-none" style={{ background: "rgba(255,255,255,0.95)", border: "1px solid rgba(66,117,200,0.16)", color: "#1F2D4C", fontFamily: "'Montserrat', sans-serif" }} />
+                </div>
               </div>
               <div className="flex items-center gap-3 flex-wrap">
                 <button onClick={handleInvite} className="px-4 py-3 rounded-2xl text-xs uppercase tracking-[0.18em] transition-all" style={{ background: "linear-gradient(135deg, #4275C8, #A8C7F1)", color: "white", border: "none" }}>Send Invite</button>
@@ -686,7 +754,7 @@ function AdminDashboard({ rsvps, onUpdate, onDelete, onInvite, onClose }: {
                         <button onClick={() => onDelete(r.id)} className="p-1.5 rounded-lg transition-all hover:opacity-80" style={{ background: "rgba(239,68,68,0.08)", color: "#dc2626" }} title="Delete">
                           <Trash2 size={13} />
                         </button>
-                        <button onClick={() => onInvite(r.email)} className="p-1.5 rounded-lg transition-all hover:opacity-80" style={{ background: "rgba(66,117,200,0.1)", color: "#4275C8" }} title="Send invite">
+                        <button onClick={() => onInvite({ email: r.email, name: r.name })} className="p-1.5 rounded-lg transition-all hover:opacity-80" style={{ background: "rgba(66,117,200,0.1)", color: "#4275C8" }} title="Send invite">
                           <Mail size={13} />
                         </button>
                       </div>
@@ -711,9 +779,60 @@ export default function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminAuthed, setAdminAuthed] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
-  const [rsvps, setRsvps] = useState<RsvpEntry[]>(SEED_RSVPS);
+  const [rsvps, setRsvps] = useState<RsvpEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const countdown = useCountdown();
+
+  // Load RSVPs from Supabase on mount
+  useEffect(() => {
+    const loadRsvps = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchRsvps();
+        // Convert database format to app format
+        const formatted = data.map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          email: r.email,
+          attending: r.attending || "",
+          guests: r.guests || "1",
+          meal: r.meal || "",
+          message: r.message || "",
+          status: r.status || "pending",
+          submittedAt: r.submitted_at ? new Date(r.submitted_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+          invited: r.invited || false,
+        }));
+        setRsvps(formatted);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to load RSVPs from Supabase:", err);
+        setError("Could not load RSVPs. Using local storage fallback.");
+        // Fallback to localStorage
+        try {
+          const saved = localStorage.getItem("wedding_rsvps");
+          setRsvps(saved ? JSON.parse(saved) : []);
+        } catch (fallbackErr) {
+          console.error("Fallback loading failed:", fallbackErr);
+          setRsvps([]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRsvps();
+  }, []);
+
+  // Save RSVPs to localStorage as backup
+  useEffect(() => {
+    try {
+      localStorage.setItem("wedding_rsvps", JSON.stringify(rsvps));
+    } catch (err) {
+      console.error("Failed to save RSVPs to local storage:", err);
+    }
+  }, [rsvps]);
 
   // Play immediately on user gesture (Open Invitation click)
   const handleOpen = () => {
@@ -740,61 +859,199 @@ export default function App() {
     }
   };
 
-  const addRsvp = (entry: Omit<RsvpEntry, "id" | "status" | "submittedAt">) => {
+  const addRsvp = async (entry: Omit<RsvpEntry, "id" | "status" | "submittedAt">) => {
     const normalizedEmail = entry.email.trim().toLowerCase();
-    setRsvps((prev) => {
-      const existing = prev.find((r) => r.email.trim().toLowerCase() === normalizedEmail);
-      const baseEntry: RsvpEntry = {
-        ...entry,
+    try {
+      const existing = rsvps.find((r) => r.email.trim().toLowerCase() === normalizedEmail);
+      
+      const dbEntry = {
         name: entry.name || normalizedEmail.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase()),
         email: normalizedEmail,
+        attending: entry.attending,
         guests: entry.guests || "1",
         meal: entry.meal || "",
         message: entry.message || "",
-        id: existing ? existing.id : Date.now(),
-        status: "pending",
-        submittedAt: new Date().toISOString().slice(0, 10),
+        status: "pending" as RsvpStatus,
+        submitted_at: new Date().toISOString(),
+        invited: entry.invited || false,
       };
+
       if (existing) {
-        return prev.map((r) => r.email.trim().toLowerCase() === normalizedEmail ? { ...r, ...baseEntry, status: "pending" } : r);
+        // Update existing
+        await updateRsvpStatus(existing.id, "pending");
+        setRsvps((prev) =>
+          prev.map((r) =>
+            r.email.trim().toLowerCase() === normalizedEmail
+              ? { ...r, ...entry, status: "pending", submittedAt: new Date().toISOString().slice(0, 10) }
+              : r
+          )
+        );
+      } else {
+        // Create new
+        const result = await createRsvp(dbEntry);
+        if (result) {
+          const newEntry: RsvpEntry = {
+            id: result.id,
+            name: result.name,
+            email: result.email,
+            attending: result.attending,
+            guests: result.guests,
+            meal: result.meal,
+            message: result.message,
+            status: result.status as RsvpStatus,
+            submittedAt: new Date(result.submitted_at).toISOString().slice(0, 10),
+            invited: result.invited,
+          };
+          setRsvps((prev) => [newEntry, ...prev]);
+        }
       }
-      return [baseEntry, ...prev];
-    });
+    } catch (err) {
+      console.error("Failed to add RSVP:", err);
+      // Fallback to local update
+      setRsvps((prev) => {
+        const existing = prev.find((r) => r.email.trim().toLowerCase() === normalizedEmail);
+        const baseEntry: RsvpEntry = {
+          ...entry,
+          name: entry.name || normalizedEmail.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase()),
+          email: normalizedEmail,
+          guests: entry.guests || "1",
+          meal: entry.meal || "",
+          message: entry.message || "",
+          id: existing ? existing.id : Date.now(),
+          status: "pending",
+          submittedAt: new Date().toISOString().slice(0, 10),
+        };
+        if (existing) {
+          return prev.map((r) => r.email.trim().toLowerCase() === normalizedEmail ? { ...r, ...baseEntry, status: "pending" } : r);
+        }
+        return [baseEntry, ...prev];
+      });
+    }
   };
 
-  const inviteGuest = (email: string) => {
+  const inviteGuest = async (email: string, name?: string) => {
     const normalizedEmail = email.trim().toLowerCase();
+    const guestName = (name || "").trim() || normalizedEmail.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
     if (!normalizedEmail) return;
-    setRsvps((prev) => {
-      const existing = prev.find((r) => r.email.trim().toLowerCase() === normalizedEmail);
+
+    try {
+      const existing = rsvps.find((r) => r.email.trim().toLowerCase() === normalizedEmail);
+      
       if (existing) {
-        return prev.map((r) => r.email.trim().toLowerCase() === normalizedEmail ? { ...r, invited: true, message: "Invitation resent by admin", status: "pending" } : r);
-      }
-      const name = normalizedEmail.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
-      return [
-        {
-          id: Date.now(),
-          name,
+        // Send email invitation
+        const inviteResult = await markAsInvited(existing.id, normalizedEmail, guestName);
+        if (inviteResult.success) {
+          setRsvps((prev) =>
+            prev.map((r) =>
+              r.email.trim().toLowerCase() === normalizedEmail
+                ? { ...r, name: guestName, invited: true, message: "Invitation resent by admin", status: "pending" }
+                : r
+            )
+          );
+        } else {
+          console.error("Email failed to send", inviteResult.error);
+          setError(
+            inviteResult.error
+              ? `Email invitation failed to send: ${inviteResult.error}`
+              : "Email invitation failed to send. Please check the email address and email service configuration."
+          );
+        }
+      } else {
+        // Create new guest and send invitation
+        const result = await createRsvp({
+          name: guestName,
           email: normalizedEmail,
           attending: "",
           guests: "1",
           meal: "",
           message: "Invitation sent by admin",
           status: "pending",
-          submittedAt: new Date().toISOString().slice(0, 10),
+          submitted_at: new Date().toISOString(),
           invited: true,
-        },
-        ...prev,
-      ];
-    });
+        });
+
+        if (result) {
+          // Send email after creating entry
+          const inviteResult = await markAsInvited(result.id, normalizedEmail, guestName);
+          const newEntry: RsvpEntry = {
+            id: result.id,
+            name: result.name,
+            email: result.email,
+            attending: result.attending,
+            guests: result.guests,
+            meal: result.meal,
+            message: result.message,
+            status: result.status as RsvpStatus,
+            submittedAt: new Date(result.submitted_at).toISOString().slice(0, 10),
+            invited: inviteResult.success,
+          };
+          setRsvps((prev) => [newEntry, ...prev]);
+
+          if (!inviteResult.success) {
+            console.error("Email failed to send", inviteResult.error);
+            setError(
+              inviteResult.error
+                ? `Email invitation failed to send: ${inviteResult.error}`
+                : "Email invitation failed to send. Please check the email address and email service configuration."
+            );
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Failed to invite guest:", err);
+      // Fallback
+      setRsvps((prev) => {
+        const existing = prev.find((r) => r.email.trim().toLowerCase() === normalizedEmail);
+        if (existing) {
+          return prev.map((r) =>
+            r.email.trim().toLowerCase() === normalizedEmail
+              ? { ...r, name: guestName, invited: true, message: "Invitation resent by admin", status: "pending" }
+              : r
+          );
+        }
+        return [
+          {
+            id: Date.now(),
+            name: guestName,
+            email: normalizedEmail,
+            attending: "",
+            guests: "1",
+            meal: "",
+            message: "Invitation sent by admin",
+            status: "pending",
+            submittedAt: new Date().toISOString().slice(0, 10),
+            invited: true,
+          },
+          ...prev,
+        ];
+      });
+    }
   };
 
-  const updateRsvp = (id: number, status: RsvpStatus) => {
-    setRsvps((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
+  const updateRsvp = async (id: number, status: RsvpStatus) => {
+    try {
+      const success = await updateRsvpStatus(id, status);
+      if (success) {
+        setRsvps((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
+      }
+    } catch (err) {
+      console.error("Failed to update RSVP:", err);
+      // Fallback
+      setRsvps((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
+    }
   };
 
-  const deleteRsvp = (id: number) => {
-    setRsvps((prev) => prev.filter((r) => r.id !== id));
+  const deleteRsvp = async (id: number) => {
+    try {
+      const success = await deleteRsvpDb(id);
+      if (success) {
+        setRsvps((prev) => prev.filter((r) => r.id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to delete RSVP:", err);
+      // Fallback
+      setRsvps((prev) => prev.filter((r) => r.id !== id));
+    }
   };
 
   return (
@@ -822,11 +1079,26 @@ export default function App() {
       )}
 
       {adminAuthed && (
-        <AdminDashboard rsvps={rsvps} onUpdate={updateRsvp} onDelete={deleteRsvp} onInvite={inviteGuest} onClose={() => setAdminAuthed(false)} />
+        <AdminDashboard rsvps={rsvps} onUpdate={updateRsvp} onDelete={deleteRsvp} onInvite={({ email, name }) => inviteGuest(email, name)} onClose={() => setAdminAuthed(false)} />
       )}
 
       {opened && (
         <>
+          {error && (
+            <div className="fixed top-0 left-0 right-0 z-50 bg-amber-50 border-b border-amber-200 px-4 py-3 text-amber-800 text-sm flex items-center justify-between">
+              <span>⚠️ {error}</span>
+              <button onClick={() => setError(null)} className="text-amber-600 hover:text-amber-900">×</button>
+            </div>
+          )}
+
+          {loading && (
+            <div className="fixed top-0 left-0 right-0 bottom-0 z-40 bg-black/20 flex items-center justify-center">
+              <div className="bg-white rounded-2xl p-8 text-center">
+                <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading RSVPs...</p>
+              </div>
+            </div>
+          )}
           <Particles />
           <MusicPlayer audioRef={audioRef} />
           <NavBar onAdminClick={() => setShowAdminLogin(true)} />
@@ -834,7 +1106,7 @@ export default function App() {
           {/* ── Hero ──────────────────────────────────────────────── */}
           <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0">
-              <img src={HERO_IMG} alt="Sophia and Ethan" className="w-full h-full object-cover" />
+              <img src={HERO_IMG} alt="Rogimer and Alyssa Camille" className="w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(66,117,200,0.55) 0%, rgba(18,38,63,0.72) 100%)" }} />
             </div>
             <div className="relative z-10 text-center px-6">
@@ -872,21 +1144,22 @@ export default function App() {
               <SectionHeader script="Our Story" title="Captured Moments" subtitle="Glimpses of our journey together" />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{ gridAutoRows: "minmax(12rem, auto)" }}>
                 {GALLERY.map((img, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.07 }} className={`cursor-pointer group ${img.span}`} onClick={() => setLightbox(img.url)} style={{ boxShadow: "0 28px 90px rgba(47,54,64,0.16)", borderRadius: "1.75rem", background: "linear-gradient(180deg, rgba(233,243,255,0.94), rgba(228,237,249,0.98))", border: "1px solid rgba(66,117,200,0.14)" }}>
-                    <div className="relative overflow-hidden rounded-[1.5rem]" style={{ background: "#E4EDF9", minHeight: 260 }}>
-                      <img src={img.url} alt={img.alt} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" style={{ background: "#E4EDF9", filter: "contrast(1.08) saturate(1.14) brightness(1.05)", transform: "translateZ(0)", boxShadow: "inset 0 0 60px rgba(66,117,200,0.04)" }} />
-                      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 20% 18%, rgba(255,255,255,0.28), transparent 16%), radial-gradient(circle at 80% 22%, rgba(255,241,218,0.18), transparent 22%), radial-gradient(circle at 50% 78%, rgba(255,255,255,0.12), transparent 52%)" }} />
+                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.07 }} className={`cursor-pointer group ${img.span}`} onClick={() => setLightbox(img.url)} style={{ boxShadow: "0 28px 90px rgba(198,124,78,0.15), 0 0 60px rgba(218,165,105,0.1)", borderRadius: "1.75rem", background: "linear-gradient(180deg, rgba(255,250,245,0.95), rgba(250,245,240,0.98))", border: "1px solid rgba(218,165,105,0.2)" }}>
+                    <div className="relative overflow-hidden rounded-[1.5rem]" style={{ background: "#F5EFEA", minHeight: 260 }}>
+                      <img src={img.url} alt={img.alt} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" style={{ background: "#F5EFEA", filter: "sepia(0.08) contrast(1.12) saturate(1.18) brightness(1.06) hue-rotate(3deg)", transform: "translateZ(0)", boxShadow: "inset 0 0 70px rgba(218,165,105,0.08)" }} />
+                      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 15% 15%, rgba(255,255,255,0.32), transparent 20%), radial-gradient(circle at 85% 20%, rgba(255,218,185,0.22), transparent 25%), radial-gradient(circle at 50% 80%, rgba(255,182,193,0.15), transparent 55%)" }} />
                       <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[1.5rem]">
-                        <div className="absolute rounded-full opacity-30 blur-2xl" style={{ width: 110, height: 110, background: "rgba(255,255,255,0.4)", top: "8%", left: "8%" }} />
-                        <div className="absolute rounded-full opacity-20 blur-2xl" style={{ width: 88, height: 88, background: "rgba(251,214,232,0.35)", top: "62%", right: "10%" }} />
-                        <div className="absolute rounded-full opacity-70" style={{ width: 6, height: 6, background: "white", top: "24%", left: "68%" }} />
-                        <div className="absolute rounded-full opacity-60" style={{ width: 5, height: 5, background: "white", top: "51%", left: "56%" }} />
-                        <div className="absolute rounded-full opacity-50" style={{ width: 4, height: 4, background: "white", top: "58%", right: "32%" }} />
+                        <div className="absolute rounded-full opacity-35 blur-3xl" style={{ width: 130, height: 130, background: "rgba(255,218,185,0.45)", top: "5%", left: "5%" }} />
+                        <div className="absolute rounded-full opacity-25 blur-3xl" style={{ width: 100, height: 100, background: "rgba(255,182,193,0.4)", top: "60%", right: "8%" }} />
+                        <div className="absolute rounded-full opacity-20 blur-3xl" style={{ width: 80, height: 80, background: "rgba(255,228,196,0.35)", bottom: "10%", left: "15%" }} />
+                        <div className="absolute rounded-full opacity-70" style={{ width: 7, height: 7, background: "rgba(255,255,255,0.8)", top: "22%", left: "70%" }} />
+                        <div className="absolute rounded-full opacity-60" style={{ width: 6, height: 6, background: "rgba(255,240,245,0.7)", top: "48%", left: "60%" }} />
+                        <div className="absolute rounded-full opacity-50" style={{ width: 5, height: 5, background: "rgba(255,218,185,0.6)", top: "65%", right: "28%" }} />
                       </div>
-                      <div className="absolute inset-0 pointer-events-none rounded-[1.5rem]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.45), inset 0 0 48px rgba(66,117,200,0.06)" }} />
-                      <div className="absolute left-6 right-6 top-6 h-0.5 rounded-full opacity-70" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.12))" }} />
-                      <div className="absolute inset-0 transition-all duration-500 flex items-center justify-center" style={{ background: "rgba(66,117,200,0)" }}>
-                        <Heart size={20} fill="white" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ color: "white" }} />
+                      <div className="absolute inset-0 pointer-events-none rounded-[1.5rem]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.5), inset 0 0 50px rgba(218,165,105,0.08), inset 0 0 100px rgba(255,182,193,0.04)" }} />
+                      <div className="absolute left-6 right-6 top-6 h-0.5 rounded-full opacity-60" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,218,185,0.25))" }} />
+                      <div className="absolute inset-0 transition-all duration-500 flex items-center justify-center" style={{ background: "rgba(218,165,105,0)" }}>
+                        <Heart size={20} fill="white" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ color: "white", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))" }} />
                       </div>
                     </div>
                   </motion.div>
@@ -933,7 +1206,7 @@ export default function App() {
       Parents of the Bride
     </p>
     <p className="text-xl mb-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C", lineHeight: 1.3 }}>
-      Mr. Amiel A. Lopez
+      Mr. Amiel A. Lope
     </p>
     <p className="text-xl" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C", lineHeight: 1.3 }}>
       Mrs. Charmaine C. Jimenez
@@ -963,38 +1236,54 @@ export default function App() {
     </p>
   </div>
 
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
-    {PRINCIPAL_SPONSORS.map((s, i) => (
-      <motion.div
-        key={i}
-        className={i === PRINCIPAL_SPONSORS.length - 1 ? "lg:col-start-2" : ""}
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.55, delay: i * 0.05 }}
-      >
-        <GlassCard
-          className="p-8 text-center transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl"
-          style={{
-            border: "1px solid rgba(66,117,200,0.18)",
-            background: "linear-gradient(135deg, rgba(233,243,255,0.96), rgba(240,246,255,0.92))",
-            boxShadow: "0 18px 46px rgba(66,117,200,0.12)",
-          }}
-        >
-          <div className="mx-auto mb-6 h-14 w-14 rounded-full flex items-center justify-center" style={{ background: "rgba(66,117,200,0.12)" }}>
-            <Heart size={20} style={{ color: "#4275C8" }} />
-          </div>
-          <p className="text-xl mb-3" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C", lineHeight: 1.4 }}>
-            {s.mr}
-          </p>
-          <div className="mx-auto my-4 h-px w-16 rounded-full" style={{ background: "linear-gradient(90deg, #86A4E4, transparent)" }} />
-          <p className="text-xl" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C", lineHeight: 1.4 }}>
-            {s.mrs}
-          </p>
-        </GlassCard>
-      </motion.div>
-    ))}
-  </div>
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6 }}
+    className="max-w-4xl mx-auto"
+  >
+    <GlassCard
+      className="p-12"
+      style={{
+        border: "2px solid rgba(218,165,105,0.25)",
+        background: "linear-gradient(135deg, rgba(255,250,245,0.98), rgba(250,245,240,0.96))",
+        boxShadow: "0 28px 80px rgba(198,124,78,0.12), inset 0 1px 0 rgba(255,255,255,0.5)",
+      }}
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+        {PRINCIPAL_SPONSORS.map((s, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.08 }}
+            className="flex flex-col items-center text-center"
+          >
+            <div className="mb-4 h-12 w-12 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(218,165,105,0.15), rgba(255,182,193,0.1))" }}>
+              <Heart size={18} style={{ color: "#D8A56A" }} />
+            </div>
+            <p className="text-lg mb-2" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C", lineHeight: 1.4 }}>
+              {s.mr}
+            </p>
+            <p className="text-lg" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C", lineHeight: 1.4 }}>
+              {s.mrs}
+            </p>
+            {i < PRINCIPAL_SPONSORS.length - 1 && i % 2 === 0 && (
+              <div className="hidden sm:block absolute left-1/2 h-8 w-px -translate-x-1/2" style={{ background: "linear-gradient(180deg, rgba(218,165,105,0.1), transparent)" }} />
+            )}
+          </motion.div>
+        ))}
+      </div>
+      
+      <div className="mt-10 pt-8 border-t" style={{ borderColor: "rgba(218,165,105,0.15)" }}>
+        <p className="text-center text-sm" style={{ fontFamily: "'Montserrat', sans-serif", color: "#8B7C9D", lineHeight: 1.6 }}>
+          With heartfelt gratitude for the unwavering support and blessings that made this celebration possible.
+        </p>
+      </div>
+    </GlassCard>
+  </motion.div>
 </div>
 
     {/* Secondary Sponsors */}
@@ -1143,73 +1432,97 @@ export default function App() {
 
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {SECONDARY_SPONSORS.filter((s) => ["Candle Sponsors", "Cord Sponsors", "Veil Sponsors"].includes(s.label)).map((s) => (
-            <GlassCard
-              key={s.label}
-              className="p-6 text-center transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg"
-              style={{
-                background: "linear-gradient(135deg, rgba(233,243,255,0.92), rgba(245,250,255,0.96))",
-                border: "1px solid rgba(66,117,200,0.14)",
-                boxShadow: "0 14px 30px rgba(66,117,200,0.1)",
-              }}
-            >
-              <p className="text-xs tracking-widest uppercase mb-3" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>
-                {s.label}
-              </p>
-              <div className="mx-auto mb-4 h-1 w-14 rounded-full" style={{ background: "linear-gradient(90deg, #4275C8, #A8C7F1)" }} />
-              <div className="space-y-2">
-                {s.names.map((name, idx) => (
-                  <p key={idx} className="text-lg" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>
-                    {name}
-                  </p>
-                ))}
-              </div>
-            </GlassCard>
-          ))}
+          {SECONDARY_SPONSORS.filter((s) => ["Candle Sponsors", "Cord Sponsors", "Veil Sponsors"].includes(s.label)).map((s) => {
+            let IconComponent;
+            if (s.label === "Candle Sponsors") IconComponent = CandleIcon;
+            else if (s.label === "Cord Sponsors") IconComponent = CordIcon;
+            else if (s.label === "Veil Sponsors") IconComponent = VeilIcon;
+
+            return (
+              <GlassCard
+                key={s.label}
+                className="p-6 text-center relative transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg"
+                style={{
+                  background: "linear-gradient(135deg, rgba(255,250,245,0.95), rgba(250,245,240,0.93))",
+                  border: "1px solid rgba(218,165,105,0.2)",
+                  boxShadow: "0 14px 30px rgba(198,124,78,0.08)",
+                }}
+              >
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(218,165,105,0.15)" }}>
+                  {IconComponent && <IconComponent />}
+                </div>
+                <p className="text-xs tracking-widest uppercase mb-3 mt-2" style={{ fontFamily: "'Montserrat', sans-serif", color: "#8B7C9D" }}>
+                  {s.label}
+                </p>
+                <div className="mx-auto mb-4 h-1 w-14 rounded-full" style={{ background: "linear-gradient(90deg, #D8A56A, #F0C5A0)" }} />
+                <div className="space-y-2">
+                  {s.names.map((name, idx) => (
+                    <p key={idx} className="text-lg" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>
+                      {name}
+                    </p>
+                  ))}
+                </div>
+              </GlassCard>
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {SECONDARY_SPONSORS.filter((s) => ["Ring Bearer", "Coin Bearer", "Bible Bearer", "Veil Bearer"].includes(s.label)).map((s) => (
-            <GlassCard
-              key={s.label}
-              className="p-6 text-center transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg"
-              style={{
-                background: "linear-gradient(135deg, rgba(233,243,255,0.92), rgba(245,250,255,0.96))",
-                border: "1px solid rgba(66,117,200,0.14)",
-                boxShadow: "0 14px 30px rgba(66,117,200,0.1)",
-              }}
-            >
-              <p className="text-xs tracking-widest uppercase mb-3" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>
-                {s.label}
-              </p>
-              <div className="mx-auto mb-4 h-1 w-14 rounded-full" style={{ background: "linear-gradient(90deg, #4275C8, #A8C7F1)" }} />
-              <div className="space-y-2">
-                {s.names.map((name, idx) => (
-                  <p key={idx} className="text-lg" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>
-                    {name}
-                  </p>
-                ))}
-              </div>
-            </GlassCard>
-          ))}
+          {SECONDARY_SPONSORS.filter((s) => ["Ring Bearer", "Coin Bearer", "Bible Bearer", "Veil Bearer"].includes(s.label)).map((s) => {
+            let IconComponent;
+            if (s.label === "Ring Bearer") IconComponent = RingIcon;
+            else if (s.label === "Coin Bearer") IconComponent = CoinIcon;
+            else if (s.label === "Bible Bearer") IconComponent = BibleIcon;
+            else if (s.label === "Veil Bearer") IconComponent = VeilIcon;
+
+            return (
+              <GlassCard
+                key={s.label}
+                className="p-6 text-center relative transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg"
+                style={{
+                  background: "linear-gradient(135deg, rgba(255,250,245,0.95), rgba(250,245,240,0.93))",
+                  border: "1px solid rgba(218,165,105,0.2)",
+                  boxShadow: "0 14px 30px rgba(198,124,78,0.08)",
+                }}
+              >
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(218,165,105,0.15)" }}>
+                  {IconComponent && <IconComponent />}
+                </div>
+                <p className="text-xs tracking-widest uppercase mb-3 mt-2" style={{ fontFamily: "'Montserrat', sans-serif", color: "#8B7C9D" }}>
+                  {s.label}
+                </p>
+                <div className="mx-auto mb-4 h-1 w-14 rounded-full" style={{ background: "linear-gradient(90deg, #D8A56A, #F0C5A0)" }} />
+                <div className="space-y-2">
+                  {s.names.map((name, idx) => (
+                    <p key={idx} className="text-lg" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>
+                      {name}
+                    </p>
+                  ))}
+                </div>
+              </GlassCard>
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 gap-6">
           <GlassCard
-            className="p-6 text-center transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg"
+            className="p-6 text-center relative transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg"
             style={{
-              background: "linear-gradient(135deg, rgba(233,243,255,0.92), rgba(245,250,255,0.96))",
-              border: "1px solid rgba(66,117,200,0.14)",
-              boxShadow: "0 14px 30px rgba(66,117,200,0.1)",
+              background: "linear-gradient(135deg, rgba(255,250,245,0.95), rgba(250,245,240,0.93))",
+              border: "1px solid rgba(218,165,105,0.2)",
+              boxShadow: "0 14px 30px rgba(198,124,78,0.08)",
             }}
           >
-            <p className="text-xs tracking-widest uppercase mb-3" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(218,165,105,0.15)" }}>
+              <FlowerIcon />
+            </div>
+            <p className="text-xs tracking-widest uppercase mb-3 mt-2" style={{ fontFamily: "'Montserrat', sans-serif", color: "#8B7C9D" }}>
               Flower Maidens
             </p>
-            <div className="mx-auto mb-4 h-1 w-14 rounded-full" style={{ background: "linear-gradient(90deg, #4275C8, #A8C7F1)" }} />
+            <div className="mx-auto mb-4 h-1 w-14 rounded-full" style={{ background: "linear-gradient(90deg, #D8A56A, #F0C5A0)" }} />
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 justify-items-center">
               {SECONDARY_SPONSORS.find((s) => s.label === "Flower Maidens")?.names.map((name, idx) => (
-                <p key={idx} className="text-xl" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>
+                <p key={idx} className="text-lg" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>
                   {name}
                 </p>
               ))}
@@ -1238,33 +1551,38 @@ export default function App() {
           </section>
 
           {/* ── Ceremony & Reception ──────────────────────────────── */}
-          <section id="ceremony" className="py-20 px-6">
-            <div className="max-w-4xl mx-auto">
+          <section id="ceremony" className="py-12 px-6">
+            <div className="max-w-3xl mx-auto">
               <SectionHeader script="Join Us" title="Ceremony & Reception" />
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
-                <GlassCard className="overflow-hidden border border-white/60 shadow-lg">
-                  <div className="grid gap-6 lg:grid-cols-[0.78fr,1.22fr] items-stretch">
-                    <div className="relative overflow-hidden rounded-3xl min-h-[240px]">
-                      <img src="/images/Spacio.jpg" alt="Spacio Caliraya" className="w-full h-full object-cover" style={{ background: "#E4EDF9" }} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,44,97,0.7)] via-transparent to-transparent" />
+                <GlassCard className="overflow-hidden border border-white/60 shadow-lg" style={{ background: "linear-gradient(135deg, rgba(255,250,245,0.92), rgba(250,245,240,0.9))", border: "1px solid rgba(218,165,105,0.2)", boxShadow: "0 12px 40px rgba(198,124,78,0.1)" }}>
+                  <div className="grid gap-0 lg:grid-cols-2">
+                    <div className="relative overflow-hidden min-h-[200px] lg:min-h-[280px]">
+                      <img src="/images/Spacio.jpg" alt="Spacio Caliraya" className="w-full h-full object-cover" style={{ background: "#F5EFEA" }} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[rgba(139,120,93,0.4)] via-transparent to-transparent" />
                     </div>
-                    <div className="p-6 lg:p-8 flex flex-col justify-between">
-                      <div className="space-y-8">
-                        <div className="space-y-3">
-                          <p className="text-xs tracking-[0.28em] uppercase" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>Ceremony</p>
-                          <p className="text-2xl font-light" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>3:30 PM</p>
-                          <p className="text-lg" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>Spacio Caliraya Garden</p>
+                    <div className="p-6 lg:p-8 flex flex-col justify-center">
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <p className="text-xs tracking-[0.28em] uppercase" style={{ fontFamily: "'Montserrat', sans-serif", color: "#8B7C9D" }}>Ceremony</p>
+                          <p className="text-xl font-light" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>3:30 PM</p>
+                          <p className="text-base" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#6B7C9D" }}>Spacio Caliraya Garden</p>
                         </div>
-                        <div className="space-y-3">
-                          <p className="text-xs tracking-[0.28em] uppercase" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>Reception</p>
-                          <p className="text-2xl font-light" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>5:00 PM</p>
-                          <p className="text-lg" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>Spacio Caliraya Reception Hall</p>
+                        <div className="h-px" style={{ background: "linear-gradient(90deg, rgba(218,165,105,0.2), transparent)" }} />
+                        <div className="space-y-2">
+                          <p className="text-xs tracking-[0.28em] uppercase" style={{ fontFamily: "'Montserrat', sans-serif", color: "#8B7C9D" }}>Reception</p>
+                          <p className="text-xl font-light" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C" }}>5:00 PM</p>
+                          <p className="text-base" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#6B7C9D" }}>Spacio Caliraya Reception Hall</p>
                         </div>
                       </div>
-                      <div>
-                        <p className="text-xs tracking-[0.28em] uppercase mb-2" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>Address</p>
-                        <p className="text-sm mb-4" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#6B7C9D" }}>National Rd. Brgy. Lewin, Lake Caliraya Lumban Laguna</p>
-                        <div className="overflow-hidden rounded-3xl border border-[#CBD5E1] shadow-sm" style={{ minHeight: 260 }}>
+                    </div>
+                  </div>
+                  <div className="border-t" style={{ borderColor: "rgba(218,165,105,0.15)" }}>
+                    <div className="px-6 lg:px-8 py-6">
+                      <p className="text-xs tracking-[0.28em] uppercase mb-3" style={{ fontFamily: "'Montserrat', sans-serif", color: "#8B7C9D" }}>Location</p>
+                      <p className="text-sm mb-4" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#6B7C9D", lineHeight: 1.6 }}>National Rd. Brgy. Lewin, Lake Caliraya Lumban Laguna</p>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex-1 overflow-hidden rounded-2xl border" style={{ borderColor: "rgba(218,165,105,0.2)", minHeight: 140 }}>
                           <iframe
                             title="Spacio Caliraya map"
                             className="w-full h-full"
@@ -1274,8 +1592,8 @@ export default function App() {
                             loading="lazy"
                           />
                         </div>
-                        <a href="https://www.google.com/maps?q=Spacio+Caliraya+Garden+Lake+Caliraya+Lumban+Laguna" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 mt-4 rounded-full text-xs uppercase tracking-[0.18em] transition-all hover:scale-105" style={{ fontFamily: "'Montserrat', sans-serif", background: "linear-gradient(135deg, #4275C8, #A8C7F1)", color: "white", textDecoration: "none", boxShadow: "0 4px 14px rgba(66,117,200,0.3)" }}>
-                          <MapPin size={12} /> View on Map
+                        <a href="https://www.google.com/maps?q=Spacio+Caliraya+Garden+Lake+Caliraya+Lumban+Laguna" target="_blank" rel="noreferrer" className="flex items-center justify-center px-5 py-3 rounded-2xl text-xs uppercase tracking-[0.18em] transition-all hover:scale-105 whitespace-nowrap" style={{ fontFamily: "'Montserrat', sans-serif", background: "linear-gradient(135deg, rgba(218,165,105,0.2), rgba(255,182,193,0.1))", color: "#D8A56A", textDecoration: "none", border: "1px solid rgba(218,165,105,0.3)" }}>
+                          <MapPin size={14} className="mr-2" /> View on Map
                         </a>
                       </div>
                     </div>
