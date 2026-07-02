@@ -1923,13 +1923,9 @@ export default function App() {
                 {
                   question: "Where can I stay nearby?",
                   answer:
-                    "For our beloved guests traveling from afar, we have prepared a list of nearby accommodations for your convenience. We kindly recommend booking your stay in advance.\n\n• Hotel Name 1 (5 minutes from the venue)\n• Hotel Name 2 (10 minutes from the venue)\n• Hotel Name 3 (15 minutes from the venue)",
+                    "For our beloved guests traveling from afar, we have prepared a list of nearby accommodations for your convenience. We kindly recommend booking your stay in advance.\n\n• Caliraya Heights Resorts & Events Place (3-5 minutes from the venue)\n• Caliraya Resort Club (8-10 minutes from the venue)\n• Mountain Lake Resort (10-15 minutes from the venue)\n• Baliraya Resort & Spa (8-12 minutes from the venue)",
                 },
-                {
-                  question: "Who should I contact for questions?",
-                  answer:
-                    "Please reach out to our wedding coordinator or send us a message through the RSVP section of this website.",
-                },
+                
               ].map((faq, index) => (
                 <details
                   key={index}
