@@ -1139,7 +1139,7 @@ export default function App() {
           </section>
 
           {/* ── Gallery ───────────────────────────────────────────── */}
-          {/* ─── Gallery Section ───────────────────────────────────────────── */}
+       {/* ─── Gallery Section ───────────────────────────────────────────── */}
 <section
   id="gallery"
   className="relative py-28 overflow-hidden"
@@ -1198,18 +1198,20 @@ export default function App() {
     />
 
     {/* Editorial Gallery Layout */}
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[180px]">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[140px] md:auto-rows-[180px]">
       {GALLERY.map((item, index) => {
         const spans = [
-          "md:col-span-2 md:row-span-3", // Photo 1
-          "md:col-span-2 md:row-span-2", // Photo 2
-          "md:col-span-1 md:row-span-2", // Photo 3
-          "md:col-span-1 md:row-span-2", // Photo 4
-          "md:col-span-2 md:row-span-4", // Photo 5
-          "md:col-span-2 md:row-span-3", // Photo 6
-          "md:col-span-1 md:row-span-2", // Photo 7
-          "md:col-span-2 md:row-span-2", // Photo 8
-          "md:col-span-1 md:row-span-2", // Photo 9
+          // Mobile: all images = row-span-3
+          // Desktop: preserve your original layout
+          "row-span-3 md:col-span-2 md:row-span-3", // Photo 1
+          "row-span-3 md:col-span-2 md:row-span-2", // Photo 2
+          "row-span-3 md:col-span-1 md:row-span-2", // Photo 3
+          "row-span-3 md:col-span-1 md:row-span-2", // Photo 4
+          "row-span-3 md:col-span-2 md:row-span-4", // Photo 5
+          "row-span-3 md:col-span-2 md:row-span-3", // Photo 6
+          "row-span-3 md:col-span-1 md:row-span-2", // Photo 7
+          "row-span-3 md:col-span-2 md:row-span-2", // Photo 8
+          "row-span-3 md:col-span-1 md:row-span-2", // Photo 9
         ];
 
         return (
@@ -1263,7 +1265,7 @@ export default function App() {
                 background:
                   "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%)",
                 transform: "translateX(-100%)",
-                animation: "shine 3s infinite",
+                animation: "shine 4s infinite",
               }}
             />
           </motion.div>
@@ -1491,7 +1493,7 @@ export default function App() {
               {s.mrs}
             </p>
 
-     
+          
           </motion.div>
         ))}
       </div>
@@ -1856,6 +1858,129 @@ export default function App() {
               </motion.div>
             </div>
           </section>
+
+          {/* ─── Frequently Asked Questions ───────────────────────────────── */}
+        <section
+          id="faq"
+          className="relative py-28 overflow-hidden"
+          style={{
+            background:
+              "linear-gradient(180deg,#FDFEFF 0%,#F6F9FD 40%,#EDF4FB 100%)",
+          }}
+        >
+          {/* Ambient Light */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: `
+                radial-gradient(circle at 20% 20%, rgba(190,220,250,0.18), transparent 35%),
+                radial-gradient(circle at 80% 30%, rgba(220,235,250,0.22), transparent 40%),
+                radial-gradient(circle at 50% 85%, rgba(210,225,240,0.15), transparent 45%)
+              `,
+              filter: "blur(60px)",
+            }}
+          />
+
+          <div className="max-w-4xl mx-auto px-6 relative z-10">
+            <SectionHeader
+              script="Questions & Answers"
+              title="Frequently Asked Questions"
+              subtitle="Everything you need to know before our special day"
+            />
+
+            <div className="space-y-5 mt-16">
+              {[
+                {
+                  question: "What is the dress code?",
+                  answer:
+                    "We kindly request our guests to wear formal or semi-formal attire in soft and elegant colors. Please avoid wearing white, ivory, or cream.",
+                },
+                {
+                  question: "What time should I arrive?",
+                  answer:
+                    "We recommend arriving at least 30 minutes before the ceremony begins to allow time for seating and registration.",
+                },
+                {
+                  question: "Can I bring a plus one?",
+                  answer:
+                    "Due to venue capacity, only guests named on the invitation are invited to attend. Thank you for understanding.",
+                },
+                {
+                  question: "Will there be parking available?",
+                  answer:
+                    "Yes, complimentary parking will be available at the venue for all guests.",
+                },
+                {
+                  question: "Can I take photos during the ceremony?",
+                  answer:
+                    "We kindly ask guests to refrain from taking photos during the ceremony so everyone can be fully present. Feel free to capture moments during the reception!",
+                },
+                {
+                  question: "Do you have a gift registry?",
+                  answer:
+                    "Your presence is the greatest gift of all. However, if you wish to bless us further, a monetary gift towards our future together would be greatly appreciated.",
+                },
+                {
+                  question: "Where can I stay nearby?",
+                  answer:
+                    "For our beloved guests traveling from afar, we have prepared a list of nearby accommodations for your convenience. We kindly recommend booking your stay in advance.\n\n• Hotel Name 1 (5 minutes from the venue)\n• Hotel Name 2 (10 minutes from the venue)\n• Hotel Name 3 (15 minutes from the venue)",
+                },
+                {
+                  question: "Who should I contact for questions?",
+                  answer:
+                    "Please reach out to our wedding coordinator or send us a message through the RSVP section of this website.",
+                },
+              ].map((faq, index) => (
+                <details
+                  key={index}
+                  className="group rounded-3xl overflow-hidden"
+                  style={{
+                    background: "rgba(255,255,255,0.72)",
+                    backdropFilter: "blur(24px)",
+                    border: "1px solid rgba(255,255,255,0.85)",
+                    boxShadow: "0 12px 40px rgba(115,145,180,0.10)",
+                  }}
+                >
+                  <summary
+                    className="flex items-center justify-between cursor-pointer p-6 list-none"
+                    style={{
+                      color: "#2F4058",
+                      fontFamily: "'Cormorant Garamond', serif",
+                    }}
+                  >
+                    <span className="text-xl md:text-2xl font-semibold">
+                      {faq.question}
+                    </span>
+
+                    <span className="text-2xl transition-transform duration-300 group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+
+                  <div className="px-6 pb-6">
+                    <div
+                      className="h-px mb-5"
+                      style={{
+                        background:
+                          "linear-gradient(to right, transparent, rgba(160,180,200,.35), transparent)",
+                      }}
+                    />
+
+                    <p
+                      className="leading-8 whitespace-pre-line"
+                      style={{
+                        color: "#5B6B84",
+                        fontFamily: "'Montserrat', sans-serif",
+                      }}
+                    >
+                      {faq.answer}
+                    </p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
 
           {/* ── Footer ────────────────────────────────────────────── */}
           <footer className="text-center py-12 px-6" style={{ borderTop: "1px solid rgba(66,117,200,0.2)" }}>
