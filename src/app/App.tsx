@@ -8,6 +8,8 @@ import {
   Mail, UserCheck, UserX, RefreshCw, User,
 } from "lucide-react";
 import { fetchRsvps, createRsvp, updateRsvpStatus, deleteRsvp as deleteRsvpDb, markAsInvited } from "../lib/database";
+
+import { supabase } from "../lib/supabase.ts"; // adjust path if needed
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const WEDDING_DATE = new Date("2026-11-28T16:00:00");
@@ -935,98 +937,120 @@ export default function App() {
     if (!normalizedEmail) return;
 
     try {
-      const existing = rsvps.find((r) => r.email.trim().toLowerCase() === normalizedEmail);
-      
-      if (existing) {
-        // Send email invitation
-        const inviteResult = await markAsInvited(existing.id, normalizedEmail, guestName);
-        if (inviteResult.success) {
-          setRsvps((prev) =>
-            prev.map((r) =>
-              r.email.trim().toLowerCase() === normalizedEmail
-                ? { ...r, name: guestName, invited: true, message: "Invitation resent by admin", status: "pending" }
-                : r
-            )
-          );
-        } else {
-          console.error("Email failed to send", inviteResult.error);
-          setError(
-            inviteResult.error
-              ? `Email invitation failed to send: ${inviteResult.error}`
-              : "Email invitation failed to send. Please check the email address and email service configuration."
-          );
-        }
-      } else {
-        // Create new guest and send invitation
-        const result = await createRsvp({
-          name: guestName,
+    const { data, error } = await supabase.functions.invoke(
+      "send-wedding-invitation",
+      {
+        body: {
           email: normalizedEmail,
-          attending: "",
-          guests: "1",
-          meal: "",
-          message: "Invitation sent by admin",
-          status: "pending",
-          submitted_at: new Date().toISOString(),
-          invited: true,
-        });
-
-        if (result) {
-          // Send email after creating entry
-          const inviteResult = await markAsInvited(result.id, normalizedEmail, guestName);
-          const newEntry: RsvpEntry = {
-            id: result.id,
-            name: result.name,
-            email: result.email,
-            attending: result.attending,
-            guests: result.guests,
-            meal: result.meal,
-            message: result.message,
-            status: result.status as RsvpStatus,
-            submittedAt: new Date(result.submitted_at).toISOString().slice(0, 10),
-            invited: inviteResult.success,
-          };
-          setRsvps((prev) => [newEntry, ...prev]);
-
-          if (!inviteResult.success) {
-            console.error("Email failed to send", inviteResult.error);
-            setError(
-              inviteResult.error
-                ? `Email invitation failed to send: ${inviteResult.error}`
-                : "Email invitation failed to send. Please check the email address and email service configuration."
-            );
-          }
-        }
+          name: guestName,
+        },
       }
-    } catch (err) {
-      console.error("Failed to invite guest:", err);
-      // Fallback
-      setRsvps((prev) => {
-        const existing = prev.find((r) => r.email.trim().toLowerCase() === normalizedEmail);
-        if (existing) {
-          return prev.map((r) =>
-            r.email.trim().toLowerCase() === normalizedEmail
-              ? { ...r, name: guestName, invited: true, message: "Invitation resent by admin", status: "pending" }
-              : r
-          );
-        }
-        return [
-          {
-            id: Date.now(),
-            name: guestName,
-            email: normalizedEmail,
-            attending: "",
-            guests: "1",
-            meal: "",
-            message: "Invitation sent by admin",
-            status: "pending",
-            submittedAt: new Date().toISOString().slice(0, 10),
-            invited: true,
-          },
-          ...prev,
-        ];
-      });
+    );
+
+    if (error) {
+      console.error("Edge function error:", error);
+      return;
     }
-  };
+
+    console.log("Invitation sent:", data);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+  }
+};
+
+  //   try {
+  //     const existing = rsvps.find((r) => r.email.trim().toLowerCase() === normalizedEmail);
+      
+  //     if (existing) {
+  //       // Send email invitation
+  //       const inviteResult = await markAsInvited(existing.id, normalizedEmail, guestName);
+  //       if (inviteResult.success) {
+  //         setRsvps((prev) =>
+  //           prev.map((r) =>
+  //             r.email.trim().toLowerCase() === normalizedEmail
+  //               ? { ...r, name: guestName, invited: true, message: "Invitation resent by admin", status: "pending" }
+  //               : r
+  //           )
+  //         );
+  //       } else {
+  //         console.error("Email failed to send", inviteResult.error);
+  //         setError(
+  //           inviteResult.error
+  //             ? `Email invitation failed to send: ${inviteResult.error}`
+  //             : "Email invitation failed to send. Please check the email address and email service configuration."
+  //         );
+  //       }
+  //     } else {
+  //       // Create new guest and send invitation
+  //       const result = await createRsvp({
+  //         name: guestName,
+  //         email: normalizedEmail,
+  //         attending: "",
+  //         guests: "1",
+  //         meal: "",
+  //         message: "Invitation sent by admin",
+  //         status: "pending",
+  //         submitted_at: new Date().toISOString(),
+  //         invited: true,
+  //       });
+
+  //       if (result) {
+  //         // Send email after creating entry
+  //         const inviteResult = await markAsInvited(result.id, normalizedEmail, guestName);
+  //         const newEntry: RsvpEntry = {
+  //           id: result.id,
+  //           name: result.name,
+  //           email: result.email,
+  //           attending: result.attending,
+  //           guests: result.guests,
+  //           meal: result.meal,
+  //           message: result.message,
+  //           status: result.status as RsvpStatus,
+  //           submittedAt: new Date(result.submitted_at).toISOString().slice(0, 10),
+  //           invited: inviteResult.success,
+  //         };
+  //         setRsvps((prev) => [newEntry, ...prev]);
+
+  //         if (!inviteResult.success) {
+  //           console.error("Email failed to send", inviteResult.error);
+  //           setError(
+  //             inviteResult.error
+  //               ? `Email invitation failed to send: ${inviteResult.error}`
+  //               : "Email invitation failed to send. Please check the email address and email service configuration."
+  //           );
+  //         }
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.error("Failed to invite guest:", err);
+  //     // Fallback
+  //     setRsvps((prev) => {
+  //       const existing = prev.find((r) => r.email.trim().toLowerCase() === normalizedEmail);
+  //       if (existing) {
+  //         return prev.map((r) =>
+  //           r.email.trim().toLowerCase() === normalizedEmail
+  //             ? { ...r, name: guestName, invited: true, message: "Invitation resent by admin", status: "pending" }
+  //             : r
+  //         );
+  //       }
+  //       return [
+  //         {
+  //           id: Date.now(),
+  //           name: guestName,
+  //           email: normalizedEmail,
+  //           attending: "",
+  //           guests: "1",
+  //           meal: "",
+  //           message: "Invitation sent by admin",
+  //           status: "pending",
+  //           submittedAt: new Date().toISOString().slice(0, 10),
+  //           invited: true,
+  //         },
+  //         ...prev,
+  //       ];
+  //     });
+  //   }
+  // };
 
   const updateRsvp = async (id: number, status: RsvpStatus) => {
     try {
