@@ -1139,43 +1139,150 @@ export default function App() {
           </section>
 
           {/* ── Gallery ───────────────────────────────────────────── */}
-          <section id="gallery" className="py-24 px-6 relative" style={{ background: "linear-gradient(180deg, #F4F8FF 0%, #E8F2FF 100%)" }}>
-            <div className="max-w-6xl mx-auto">
-              <SectionHeader script="Our Story" title="Captured Moments" subtitle="Glimpses of our journey together" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{ gridAutoRows: "minmax(12rem, auto)" }}>
-                {GALLERY.map((img, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.07 }} className={`cursor-pointer group ${img.span}`} onClick={() => setLightbox(img.url)} style={{ boxShadow: "0 28px 90px rgba(198,124,78,0.15), 0 0 60px rgba(218,165,105,0.1)", borderRadius: "1.75rem", background: "linear-gradient(180deg, rgba(255,250,245,0.95), rgba(250,245,240,0.98))", border: "1px solid rgba(218,165,105,0.2)" }}>
-                    <div className="relative overflow-hidden rounded-[1.5rem]" style={{ background: "#F5EFEA", minHeight: 260 }}>
-                      <img src={img.url} alt={img.alt} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" style={{ background: "#F5EFEA", filter: "sepia(0.08) contrast(1.12) saturate(1.18) brightness(1.06) hue-rotate(3deg)", transform: "translateZ(0)", boxShadow: "inset 0 0 70px rgba(218,165,105,0.08)" }} />
-                      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 15% 15%, rgba(255,255,255,0.32), transparent 20%), radial-gradient(circle at 85% 20%, rgba(255,218,185,0.22), transparent 25%), radial-gradient(circle at 50% 80%, rgba(255,182,193,0.15), transparent 55%)" }} />
-                      <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[1.5rem]">
-                        <div className="absolute rounded-full opacity-35 blur-3xl" style={{ width: 130, height: 130, background: "rgba(255,218,185,0.45)", top: "5%", left: "5%" }} />
-                        <div className="absolute rounded-full opacity-25 blur-3xl" style={{ width: 100, height: 100, background: "rgba(255,182,193,0.4)", top: "60%", right: "8%" }} />
-                        <div className="absolute rounded-full opacity-20 blur-3xl" style={{ width: 80, height: 80, background: "rgba(255,228,196,0.35)", bottom: "10%", left: "15%" }} />
-                        <div className="absolute rounded-full opacity-70" style={{ width: 7, height: 7, background: "rgba(255,255,255,0.8)", top: "22%", left: "70%" }} />
-                        <div className="absolute rounded-full opacity-60" style={{ width: 6, height: 6, background: "rgba(255,240,245,0.7)", top: "48%", left: "60%" }} />
-                        <div className="absolute rounded-full opacity-50" style={{ width: 5, height: 5, background: "rgba(255,218,185,0.6)", top: "65%", right: "28%" }} />
-                      </div>
-                      <div className="absolute inset-0 pointer-events-none rounded-[1.5rem]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.5), inset 0 0 50px rgba(218,165,105,0.08), inset 0 0 100px rgba(255,182,193,0.04)" }} />
-                      <div className="absolute left-6 right-6 top-6 h-0.5 rounded-full opacity-60" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,218,185,0.25))" }} />
-                      <div className="absolute inset-0 transition-all duration-500 flex items-center justify-center" style={{ background: "rgba(218,165,105,0)" }}>
-                        <Heart size={20} fill="white" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ color: "white", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))" }} />
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
+          {/* ─── Gallery Section ───────────────────────────────────────────── */}
+<section
+  id="gallery"
+  className="relative py-28 overflow-hidden"
+  style={{
+    background:
+      "linear-gradient(180deg,#FDFEFF 0%,#F3F8FD 25%,#EAF2FA 60%,#FDFEFF 100%)",
+  }}
+>
+  {/* Ambient Light */}
+  <div
+    className="absolute inset-0 pointer-events-none"
+    style={{
+      background: `
+        radial-gradient(circle at 20% 20%, rgba(190,220,250,0.18), transparent 35%),
+        radial-gradient(circle at 80% 30%, rgba(220,235,250,0.22), transparent 40%),
+        radial-gradient(circle at 50% 85%, rgba(210,225,240,0.15), transparent 45%)
+      `,
+      filter: "blur(60px)",
+    }}
+  />
 
-          {lightbox && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(47,54,64,0.92)", backdropFilter: "blur(8px)" }} onClick={() => setLightbox(null)}>
-              <motion.img initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} src={lightbox.replace("w=600", "w=1200")} alt="Gallery" className="max-w-3xl max-h-[85vh] w-full object-contain rounded-xl" onClick={(e) => e.stopPropagation()} />
-              <button onClick={() => setLightbox(null)} className="absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.2)" }}>
-                <X size={16} color="white" />
-              </button>
-            </div>
-          )}
+  {/* Floating particles */}
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    {Array.from({ length: 20 }).map((_, i) => (
+      <motion.div
+        key={i}
+        animate={{
+          y: [-20, 20, -20],
+          x: [-5, 5, -5],
+          opacity: [0.1, 0.3, 0.1],
+        }}
+        transition={{
+          duration: 8 + i,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute rounded-full"
+        style={{
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          width: `${4 + Math.random() * 8}px`,
+          height: `${4 + Math.random() * 8}px`,
+          background:
+            "radial-gradient(circle, rgba(255,255,255,0.9), rgba(210,225,240,0.4))",
+          filter: "blur(1px)",
+        }}
+      />
+    ))}
+  </div>
+
+  <div className="max-w-7xl mx-auto px-6 relative z-10">
+    <SectionHeader
+      script="Captured Moments"
+      title="Our Gallery"
+      subtitle="A collection of memories wrapped in love and elegance"
+    />
+
+    {/* Editorial Gallery Layout */}
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[180px]">
+      {GALLERY.map((item, index) => {
+        const spans = [
+          "md:col-span-2 md:row-span-3", // Photo 1
+          "md:col-span-2 md:row-span-2", // Photo 2
+          "md:col-span-1 md:row-span-2", // Photo 3
+          "md:col-span-1 md:row-span-2", // Photo 4
+          "md:col-span-2 md:row-span-4", // Photo 5
+          "md:col-span-2 md:row-span-3", // Photo 6
+          "md:col-span-1 md:row-span-2", // Photo 7
+          "md:col-span-2 md:row-span-2", // Photo 8
+          "md:col-span-1 md:row-span-2", // Photo 9
+        ];
+
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{
+              duration: 0.7,
+              delay: index * 0.08,
+            }}
+            whileHover={{
+              y: -8,
+              scale: 1.02,
+            }}
+            className={`${spans[index]} relative group cursor-pointer overflow-hidden`}
+            onClick={() => setLightbox(item.url)}
+            style={{
+              background: "rgba(255,255,255,0.72)",
+              backdropFilter: "blur(24px)",
+              border: "1px solid rgba(255,255,255,0.85)",
+              borderRadius: "24px",
+              boxShadow: "0 12px 40px rgba(115,145,180,0.12)",
+            }}
+          >
+            {/* Image */}
+            <img
+              src={item.url}
+              alt={item.alt}
+              className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
+              style={{
+                filter:
+                  "brightness(1.03) contrast(1.05) saturate(0.95)",
+              }}
+            />
+
+            {/* Frost Overlay */}
+            <div
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(255,255,255,0.18), rgba(180,210,240,0.12))",
+              }}
+            />
+
+            {/* Shine Effect */}
+            <div
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-700"
+              style={{
+                background:
+                  "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%)",
+                transform: "translateX(-100%)",
+                animation: "shine 4s infinite",
+              }}
+            />
+          </motion.div>
+        );
+      })}
+    </div>
+  </div>
+
+  <style>{`
+    @keyframes shine {
+      from {
+        transform: translateX(-100%);
+      }
+      to {
+        transform: translateX(100%);
+      }
+    }
+  `}</style>
+</section>
 
           
 
