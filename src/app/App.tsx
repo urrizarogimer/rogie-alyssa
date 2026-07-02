@@ -1263,7 +1263,7 @@ export default function App() {
                 background:
                   "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%)",
                 transform: "translateX(-100%)",
-                animation: "shine 4s infinite",
+                animation: "shine 3s infinite",
               }}
             />
           </motion.div>
@@ -1333,13 +1333,73 @@ export default function App() {
 </div>
 
  {/* Principal Sponsors */}
-<div className="mb-20">
-  <div className="max-w-4xl mx-auto mb-10 text-center">
-    <p className="text-xs tracking-[0.35em] uppercase mb-3" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>
+<div className="mb-20 relative overflow-hidden">
+
+  {/* Ambient Cold Light */}
+  <div
+    className="absolute inset-0 pointer-events-none"
+    style={{
+      background: `
+        radial-gradient(circle at 20% 20%, rgba(190,220,250,0.18), transparent 35%),
+        radial-gradient(circle at 80% 30%, rgba(220,235,250,0.22), transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(200,220,240,0.15), transparent 45%)
+      `,
+      filter: "blur(60px)",
+    }}
+  />
+
+  {/* Floating Frost Particles */}
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    {Array.from({ length: 15 }).map((_, i) => (
+      <motion.div
+        key={i}
+        animate={{
+          y: [-10, 15, -10],
+          x: [-5, 5, -5],
+          opacity: [0.15, 0.35, 0.15],
+        }}
+        transition={{
+          duration: 8 + i,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute rounded-full"
+        style={{
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          width: `${3 + Math.random() * 6}px`,
+          height: `${3 + Math.random() * 6}px`,
+          background:
+            "radial-gradient(circle, rgba(255,255,255,0.9), rgba(210,225,240,0.4))",
+          filter: "blur(1px)",
+        }}
+      />
+    ))}
+  </div>
+
+  {/* Section Header */}
+  <div className="max-w-4xl mx-auto mb-10 text-center relative z-10">
+    <p
+      className="text-xs tracking-[0.35em] uppercase mb-3"
+      style={{
+        fontFamily: "'Montserrat', sans-serif",
+        color: "#6C8FB8",
+      }}
+    >
       Principal Sponsors
     </p>
-    <p className="text-sm mx-auto" style={{ maxWidth: 560, fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D", lineHeight: 1.8 }}>
-      Honoring the families who support us with grace, love, and unwavering presence.
+
+    <p
+      className="text-sm mx-auto"
+      style={{
+        maxWidth: 560,
+        fontFamily: "'Montserrat', sans-serif",
+        color: "#7B8FA8",
+        lineHeight: 1.8,
+      }}
+    >
+      Honoring the families who support us with grace, love, and unwavering
+      presence.
     </p>
   </div>
 
@@ -1347,50 +1407,127 @@ export default function App() {
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    transition={{ duration: 0.6 }}
-    className="max-w-4xl mx-auto"
+    transition={{ duration: 0.8 }}
+    className="max-w-4xl mx-auto relative z-10"
   >
     <GlassCard
-      className="p-12"
+      className="p-12 relative overflow-hidden"
       style={{
-        border: "2px solid rgba(218,165,105,0.25)",
-        background: "linear-gradient(135deg, rgba(255,250,245,0.98), rgba(250,245,240,0.96))",
-        boxShadow: "0 28px 80px rgba(198,124,78,0.12), inset 0 1px 0 rgba(255,255,255,0.5)",
+        background:
+          "linear-gradient(145deg, #FFFFFF 0%, #EEF4FA 45%, #DCE7F3 100%)",
+        border: "1px solid rgba(213,224,236,0.9)",
+        backdropFilter: "blur(24px)",
+        boxShadow:
+          "0 20px 60px rgba(108,143,184,0.12), inset 0 1px 0 rgba(255,255,255,0.8)",
       }}
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+      {/* Shimmer */}
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{
+          background:
+            "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.7) 50%, transparent 70%)",
+          animation: "sponsorShine 8s linear infinite",
+        }}
+      />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 relative z-10">
         {PRINCIPAL_SPONSORS.map((s, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: i * 0.08 }}
-            className="flex flex-col items-center text-center"
+            transition={{
+              duration: 0.6,
+              delay: i * 0.08,
+            }}
+            whileHover={{
+              y: -5,
+              scale: 1.02,
+            }}
+            className="relative flex flex-col items-center text-center"
           >
-            <div className="mb-4 h-12 w-12 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(218,165,105,0.15), rgba(255,182,193,0.1))" }}>
-              <Heart size={18} style={{ color: "#D8A56A" }} />
+            {/* Icon */}
+            <div
+              className="mb-4 h-12 w-12 rounded-full flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(108,143,184,0.15), rgba(220,235,250,0.20))",
+                border: "1px solid rgba(156,180,205,0.20)",
+                boxShadow:
+                  "0 8px 20px rgba(108,143,184,0.10)",
+                backdropFilter: "blur(10px)",
+              }}
+            >
+              <Heart
+                size={18}
+                style={{
+                  color: "#6C8FB8",
+                }}
+              />
             </div>
-            <p className="text-lg mb-2" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C", lineHeight: 1.4 }}>
+
+            {/* Names */}
+            <p
+              className="text-xl mb-2"
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                color: "#1B3554",
+                lineHeight: 1.4,
+              }}
+            >
               {s.mr}
             </p>
-            <p className="text-lg" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C", lineHeight: 1.4 }}>
+
+            <p
+              className="text-xl"
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                color: "#1B3554",
+                lineHeight: 1.4,
+              }}
+            >
               {s.mrs}
             </p>
-            {i < PRINCIPAL_SPONSORS.length - 1 && i % 2 === 0 && (
-              <div className="hidden sm:block absolute left-1/2 h-8 w-px -translate-x-1/2" style={{ background: "linear-gradient(180deg, rgba(218,165,105,0.1), transparent)" }} />
-            )}
+
+     
           </motion.div>
         ))}
       </div>
-      
-      <div className="mt-10 pt-8 border-t" style={{ borderColor: "rgba(218,165,105,0.15)" }}>
-        <p className="text-center text-sm" style={{ fontFamily: "'Montserrat', sans-serif", color: "#8B7C9D", lineHeight: 1.6 }}>
-          With heartfelt gratitude for the unwavering support and blessings that made this celebration possible.
+
+      {/* Footer */}
+      <div
+        className="mt-12 pt-8 border-t relative z-10"
+        style={{
+          borderColor: "rgba(156,180,205,0.20)",
+        }}
+      >
+        <p
+          className="text-center text-sm"
+          style={{
+            fontFamily: "'Montserrat', sans-serif",
+            color: "#7B8FA8",
+            lineHeight: 1.8,
+          }}
+        >
+          With heartfelt gratitude for the unwavering support and blessings
+          that made this celebration possible.
         </p>
       </div>
     </GlassCard>
   </motion.div>
+
+  <style>{`
+    @keyframes sponsorShine {
+      from {
+        transform: translateX(-150%);
+      }
+      to {
+        transform: translateX(150%);
+      }
+    }
+  `}</style>
 </div>
 
     {/* Secondary Sponsors */}
