@@ -540,141 +540,209 @@ function GallerySection() {
 // ─── Opening Screen ───────────────────────────────────────────────────────────
 
 const OPENING_CSS = `
-.op-scene{--env-w:520px;--env-h:340px;--env-offset:70px;--seal:78px;--card-top-in:16px;--card-w-in:470px;--card-h-in:310px;--card-w:430px;--card-h:min(520px,calc(100svh - 48px));--rise:-190px;--lift:-260px;--env-dip:90px;--name:52px;--final-y:calc(var(--env-h)/2 - var(--env-offset) - var(--card-top-in) - var(--card-h)/2)}
+.op-scene{--env-w:520px;--env-h:340px;--env-offset:70px;--seal:78px;--card-top-in:16px;--card-w-in:470px;--card-h-in:310px;--card-w:430px;--card-h:min(560px,calc(100svh - 48px));--rise:-120px;--lift:-260px;--env-dip:90px;--name:52px;--final-y:calc(var(--env-h)/2 - var(--env-offset) - var(--card-top-in) - var(--card-h)/2)}
 @media (max-width:640px){
-  .op-scene{--env-w:min(340px,calc(100vw - 40px));--env-h:calc(var(--env-w)*.66);--env-offset:40px;--seal:60px;--card-top-in:12px;--card-w-in:calc(var(--env-w)*.9);--card-h-in:calc(var(--env-h)*.91);--card-w:min(340px,calc(100vw - 32px));--card-h:min(500px,calc(100svh - 40px));--rise:calc(var(--env-h)*-.49);--lift:calc(var(--env-h)*-.67);--env-dip:80px;--name:44px}
+  .op-scene{--env-w:min(340px,calc(100vw - 40px));--env-h:calc(var(--env-w)*.66);--env-offset:40px;--seal:60px;--card-top-in:12px;--card-w-in:calc(var(--env-w)*.9);--card-h-in:calc(var(--env-h)*.91);--card-w:min(340px,calc(100vw - 32px));--card-h:min(520px,calc(100svh - 40px));--rise:calc(var(--env-h)*-.36);--lift:calc(var(--env-h)*-.67);--env-dip:80px;--name:44px}
 }
+.op-scene{background:linear-gradient(160deg,#F5F8FC 0%,#E7EEF8 45%,#D3E0F0 100%)}
+.op-bokeh{position:absolute;display:block;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.85),rgba(255,255,255,0) 70%);filter:blur(6px);animation:opDrift 14s ease-in-out infinite alternate;pointer-events:none}
+@keyframes opDrift{from{transform:translate(0,0)}to{transform:translate(18px,-26px)}}
+.op-grain{position:absolute;inset:0;width:100%;height:100%;opacity:.16;mix-blend-mode:multiply;pointer-events:none}
 
-.op-lead{position:absolute;left:50%;bottom:calc(100% + 40px);width:max-content;max-width:calc(100vw - 32px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;transition:opacity .5s ease,transform .5s ease}
-.op-lead-eyebrow{margin:0;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:#1F2D4C}
+.op-lead{position:absolute;left:50%;bottom:calc(100% + 40px);width:max-content;max-width:calc(100vw - 32px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;transition:opacity .6s ease,transform .6s ease}
+.op-lead-eyebrow{margin:0;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:#33415E}
 .op-lead-names{margin:0;font-family:'Great Vibes',cursive;font-size:40px;line-height:1.2;color:#1F2D4C}
-.op-hint{position:absolute;left:0;right:0;top:calc(100% + 44px);margin:0;text-align:center;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.32em;text-transform:uppercase;color:#1F2D4C;animation:opBreathe 2.4s ease-in-out infinite;transition:opacity .5s ease}
-@keyframes opBreathe{0%,100%{opacity:.55}50%{opacity:1}}
+.op-hint{position:absolute;left:0;right:0;top:calc(100% + 46px);margin:0;text-align:center;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.32em;text-transform:uppercase;color:#33415E;animation:opBreathe 2.6s ease-in-out infinite;transition:opacity .5s ease}
+@keyframes opBreathe{0%,100%{opacity:.5}50%{opacity:1}}
 .op-open .op-lead{opacity:0;transform:translateX(-50%) translateY(-10px);pointer-events:none}
 .op-open .op-hint{opacity:0;animation:none}
 
-.op-env{position:relative;z-index:1;width:var(--env-w);height:var(--env-h);margin-top:calc(var(--env-offset)*2)}
+.op-env{position:relative;z-index:1;width:var(--env-w);height:var(--env-h);margin-top:calc(var(--env-offset)*2);transition:transform .5s ease-out;animation:opEnvIn 1.4s cubic-bezier(.22,1,.36,1) .2s both}
+@keyframes opEnvIn{from{translate:0 -60px;rotate:-5deg;opacity:0}to{translate:0 0;rotate:0deg;opacity:1}}
 .op-env-body{position:absolute;inset:0}
-.op-env-shadow,.op-env-back,.op-pocket,.op-seal{transition:transform .8s cubic-bezier(.22,1,.36,1)}
-.op-lifted .op-env-shadow,.op-lifted .op-env-back,.op-lifted .op-pocket,.op-lifted .op-seal{transform:translateY(var(--env-dip))}
+.op-env-shadow,.op-env-back,.op-pocket,.op-seal{transition:translate .8s cubic-bezier(.22,1,.36,1)}
+.op-lifted .op-env-shadow,.op-lifted .op-env-back,.op-lifted .op-pocket,.op-lifted .op-seal,.op-lifted .op-flap{translate:0 var(--env-dip)}
 .op-revealed .op-env-body{transform:translateY(calc(var(--env-h)*1.8)) rotate(5deg);opacity:0;transition:transform .9s cubic-bezier(.55,0,.8,.3),opacity .7s ease .2s}
-.op-env-shadow{position:absolute;left:5%;right:5%;bottom:-22px;height:34px;border-radius:50%;background:rgba(31,58,95,.32);filter:blur(18px)}
-.op-env-back{position:absolute;inset:0;z-index:1;border-radius:8px;background-color:#BCCDE4;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.18) 0 6px,transparent 6px 12px)}
-.op-pocket{position:absolute;inset:0;z-index:3;border-radius:8px;overflow:hidden;pointer-events:none}
-.op-pocket span{position:absolute;inset:0;display:block}
-.op-pl{background:#D8E3F1;clip-path:polygon(0 0,52% 57%,0 100%)}
-.op-pr{background:#D1DDEE;clip-path:polygon(100% 0,48% 57%,100% 100%)}
-.op-pb{background:#E3EBF6;clip-path:polygon(0 100%,50% 47%,100% 100%)}
-.op-stamp{position:absolute;left:0;right:0;bottom:14%;margin:0;text-align:center;font-family:'Cormorant Garamond',serif;font-size:14px;letter-spacing:.34em;color:#6B7C9D}
+.op-env-shadow{position:absolute;left:5%;right:5%;bottom:-22px;height:34px;border-radius:50%;background:rgba(31,58,95,.3);filter:blur(18px)}
+.op-env-back{position:absolute;inset:0;z-index:1;border-radius:6px;overflow:hidden;background:#EEF3FA}
+.op-pocket{position:absolute;inset:0;z-index:3;border-radius:6px;overflow:hidden;pointer-events:none}
+.op-pocket>span{position:absolute;inset:0;display:block}
+.op-pl{background:linear-gradient(100deg,#B9CBE3,#C3D3E8);clip-path:polygon(0 0,52% 57%,0 100%)}
+.op-pr{background:linear-gradient(260deg,#B2C5DF,#BDCEE5);clip-path:polygon(100% 0,48% 57%,100% 100%)}
+.op-pb{background:linear-gradient(0deg,#C1D1E7,#CBD9EC);clip-path:polygon(0 100%,50% 47%,100% 100%)}
+.op-edges{position:absolute;inset:0;width:100%;height:100%}
 
-.op-flap{position:absolute;left:0;top:0;width:100%;height:calc(var(--env-h)*.6);z-index:4;transform-origin:50% 0;transform:translateY(0) perspective(1400px) rotateX(0deg);transform-style:preserve-3d;transition:transform .8s cubic-bezier(.45,0,.2,1) .25s,z-index 0s linear .65s}
-.op-flap span{position:absolute;inset:0;display:block;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.op-flap-out{background:linear-gradient(180deg,#D3DFEF 0%,#C6D6EB 100%);clip-path:polygon(0 0,100% 0,50% 100%)}
-.op-flap-in{background:#B3C6E0;clip-path:polygon(50% 0,100% 100%,0 100%);transform:rotateX(180deg)}
-.op-open .op-flap{transform:translateY(0) perspective(1400px) rotateX(180deg);z-index:0}
-.op-lifted .op-flap{transform:translateY(var(--env-dip)) perspective(1400px) rotateX(180deg);transition:transform .8s cubic-bezier(.22,1,.36,1)}
+.op-flap{position:absolute;left:0;top:0;width:100%;height:calc(var(--env-h)*.6);z-index:4;transform-origin:50% 0;transform:perspective(1400px) rotateX(0deg);transform-style:preserve-3d;transition:translate .8s cubic-bezier(.22,1,.36,1),z-index 0s linear 1.15s}
+.op-flap>span{position:absolute;inset:0;display:block;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.op-flap-out{background:linear-gradient(180deg,#CAD8EB 0%,#B7C9E1 100%);clip-path:polygon(0 0,100% 0,50% 100%)}
+.op-flap-in{background:#EEF3FA;clip-path:polygon(50% 0,100% 100%,0 100%);transform:rotateX(180deg)}
+.op-open .op-flap{animation:opFlapOpen 1s cubic-bezier(.45,0,.2,1) .65s forwards;z-index:0}
+@keyframes opFlapOpen{0%{transform:perspective(1400px) rotateX(0deg)}30%{transform:perspective(1400px) rotateX(28deg)}100%{transform:perspective(1400px) rotateX(180deg)}}
 
-.op-seal{position:absolute;left:50%;top:calc(var(--env-h)*.6 - var(--seal)/2);width:var(--seal);height:var(--seal);margin-left:calc(var(--seal)/-2);z-index:6;appearance:none;border:0;padding:0;background:transparent;cursor:pointer;animation:opSealPulse 2.4s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
+.op-ribbon{position:absolute;top:calc(var(--env-h)*.6 - 12px);height:24px;z-index:5;background:linear-gradient(180deg,#182C4A 0%,#2F4D78 42%,#203A60 60%,#182C4A 100%);box-shadow:0 2px 6px rgba(15,25,45,.35);transition:transform .75s cubic-bezier(.55,0,.75,.2),opacity .6s ease .15s}
+.op-ribbon::after{content:"";position:absolute;left:0;right:0;top:6px;height:1px;background:rgba(255,255,255,.22)}
+.op-ribbon-l{left:-14px;right:50%;border-radius:2px 0 0 2px}
+.op-ribbon-r{left:50%;right:-14px;border-radius:0 2px 2px 0}
+.op-open .op-ribbon-l{transform:translateX(-70%) rotate(-4deg);opacity:0}
+.op-open .op-ribbon-r{transform:translateX(70%) rotate(4deg);opacity:0}
+.op-bow{position:absolute;left:50%;top:calc(var(--env-h)*.6);z-index:6;width:0;height:0;transition:transform .6s ease,opacity .5s ease}
+.op-bow span{position:absolute;display:block}
+.op-loop{width:58px;height:34px;top:-24px;border-radius:50%;border:8px solid #22406A;box-sizing:border-box;box-shadow:0 3px 6px rgba(15,25,45,.3)}
+.op-loop-l{left:-62px;transform:rotate(-14deg)}
+.op-loop-r{left:4px;transform:rotate(14deg)}
+.op-tail{width:12px;height:56px;top:14px;background:linear-gradient(90deg,#1A3050,#2E4C77,#1A3050);clip-path:polygon(0 0,100% 0,100% 100%,50% 86%,0 100%)}
+.op-tail-l{left:-22px;transform:rotate(18deg)}
+.op-tail-r{left:10px;transform:rotate(-18deg)}
+.op-open .op-bow{transform:scale(.6) translateY(30px);opacity:0}
+.op-sprig{position:absolute;left:calc(50% + 6px);top:calc(var(--env-h)*.6 - 84px);z-index:7;width:60px;height:96px;transform:rotate(32deg);transform-origin:20% 100%;transition:transform .7s cubic-bezier(.55,0,.75,.2),opacity .6s ease}
+.op-sprig span{position:absolute;display:block}
+.op-stem{left:28px;top:4px;width:2px;height:90px;border-radius:2px;background:#7C927B}
+.op-leaf{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#C7D6C4,#93AA92 60%,#71896F);box-shadow:0 1px 2px rgba(40,60,40,.25)}
+.op-open .op-sprig{transform:translate(40px,80px) rotate(70deg);opacity:0}
+
+.op-seal{position:absolute;left:50%;top:calc(var(--env-h)*.6 - var(--seal)/2);width:var(--seal);height:var(--seal);margin-left:calc(var(--seal)/-2);z-index:8;appearance:none;border:0;padding:0;background:transparent;cursor:pointer;animation:opPulse 2.6s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
 .op-seal:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:50%}
-.op-seal::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(255,255,255,.7);animation:opRing 2.4s ease-out infinite;pointer-events:none}
-@keyframes opSealPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-@keyframes opRing{0%{transform:scale(.85);opacity:.8}100%{transform:scale(1.45);opacity:0}}
-.op-seal-shadow{position:absolute;inset:6%;border-radius:50%;background:rgba(20,35,60,.45);filter:blur(7px);transform:translateY(5px);transition:opacity .3s ease}
-.op-half{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:47% 53% 51% 49%/52% 47% 53% 48%;background:radial-gradient(circle at 34% 30%,rgb(109,127,151) 0%,#1F3A5F 48%,rgb(19,35,57) 100%);box-shadow:inset 0 0 0 5px rgba(255,255,255,.1),inset 0 0 0 7px rgba(0,0,0,.16);font-family:'Cormorant Garamond',serif;font-weight:600;font-size:calc(var(--seal)*.3);letter-spacing:.02em;color:rgba(255,255,255,.66);text-shadow:0 -1px 0 rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.12);transition:transform .65s cubic-bezier(.3,0,.6,1),opacity .5s ease .12s}
+@keyframes opPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.op-seal-shadow{position:absolute;inset:6%;border-radius:50%;background:rgba(20,35,60,.45);filter:blur(7px);transform:translateY(5px);transition:opacity .3s ease .35s}
+.op-half{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:46% 54% 50% 50%/53% 47% 53% 47%;background:radial-gradient(circle at 34% 30%,#9DB2D4 0%,#4E6E9A 46%,#2B4366 100%);box-shadow:inset 0 0 0 3px rgba(233,215,168,.55),inset 0 0 0 6px rgba(0,0,0,.18),inset 0 -6px 10px rgba(0,0,0,.18);font-family:'Cormorant Garamond',serif;font-weight:600;font-size:calc(var(--seal)*.3);color:#F0E2BC;text-shadow:0 -1px 0 rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.15);transition:transform .65s cubic-bezier(.3,0,.6,1) .35s,opacity .5s ease .45s}
 .op-half-l{clip-path:polygon(0 0,53% 0,46% 34%,56% 58%,47% 100%,0 100%)}
 .op-half-r{clip-path:polygon(53% 0,100% 0,100% 100%,47% 100%,56% 58%,46% 34%)}
 .op-open .op-seal{animation:none;pointer-events:none}
-.op-open .op-seal::after{display:none}
 .op-open .op-seal-shadow{opacity:0}
 .op-open .op-half-l{transform:translate(-26px,52px) rotate(-32deg);opacity:0}
 .op-open .op-half-r{transform:translate(26px,52px) rotate(32deg);opacity:0}
 
-.op-card{position:absolute;left:50%;top:var(--card-top-in);width:var(--card-w-in);height:var(--card-h-in);z-index:2;overflow:hidden;background:#FBFCFE;border-radius:6px;box-shadow:0 2px 10px rgba(31,58,95,.14);transform:translateX(-50%) translateY(0);transition:transform 1s cubic-bezier(.22,1,.36,1),width .9s cubic-bezier(.22,1,.36,1),height .9s cubic-bezier(.22,1,.36,1),border-radius .6s ease,box-shadow .6s ease}
-.op-card::before{content:"";position:absolute;inset:10px;border:1px solid rgba(66,117,200,.28);border-radius:4px;pointer-events:none}
-.op-rising .op-card{transform:translateX(-50%) translateY(var(--rise))}
-.op-lifted .op-card{transform:translateX(-50%) translateY(var(--lift));z-index:10;transition:transform .8s cubic-bezier(.22,1,.36,1),z-index 0s linear .6s}
-.op-revealed .op-card{width:var(--card-w);height:var(--card-h);transform:translateX(-50%) translateY(var(--final-y));border-radius:18px;box-shadow:0 30px 80px rgba(31,58,95,.35);overflow-y:auto;animation:opFloat 5s ease-in-out 1.2s infinite}
-@keyframes opFloat{0%,100%{margin-top:0}50%{margin-top:-6px}}
-
-.op-card-in{display:flex;flex-direction:column;align-items:center;text-align:center;padding:36px 30px 30px;box-sizing:border-box}
-.op-mono{margin:0;font-family:'Cormorant Garamond',serif;font-size:30px;letter-spacing:.12em;color:#8EA9CC}
-.op-mono span{font-size:22px;color:#AAB6C5}
-.op-rule{display:block;height:1px;width:64px;margin:14px 0;background:linear-gradient(90deg,transparent,#86A4E4,transparent)}
+.op-card{position:absolute;left:50%;top:var(--card-top-in);width:var(--card-w-in);height:var(--card-h-in);z-index:2;filter:drop-shadow(0 2px 8px rgba(31,58,95,.16));transform:translateX(-50%) translateY(0) rotate(0deg);transition:transform 1.1s cubic-bezier(.22,1,.36,1),width .9s cubic-bezier(.22,1,.36,1),height .9s cubic-bezier(.22,1,.36,1),filter .6s ease}
+.op-rising .op-card{transform:translateX(-50%) translateY(var(--rise)) rotate(-1.2deg)}
+.op-lifted .op-card{transform:translateX(-50%) translateY(var(--lift)) rotate(.8deg);z-index:10;transition:transform .8s cubic-bezier(.22,1,.36,1),z-index 0s linear .6s}
+.op-revealed .op-card{width:var(--card-w);height:var(--card-h);transform:translateX(-50%) translateY(var(--final-y)) rotate(0deg);filter:drop-shadow(0 28px 50px rgba(31,58,95,.3));animation:opFloat 5s ease-in-out 1.4s infinite}
+.op-revealed .op-card:hover{animation-play-state:paused}
+@keyframes opFloat{0%,100%{translate:0 0}50%{translate:0 -6px}}
+.op-paper{position:absolute;inset:0;overflow:hidden;background:#FBF8F2}
+.op-revealed .op-paper{overflow-y:auto;overscroll-behavior:contain}
+.op-paper::before{content:"";position:absolute;inset:12px;border:1px solid rgba(184,151,90,.6);pointer-events:none}
+.op-paper::after{content:"";position:absolute;inset:17px;border:1px solid rgba(184,151,90,.28);pointer-events:none}
+.op-card-in{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 34px 30px;box-sizing:border-box}
+.op-mono{margin:0;font-family:'Cormorant Garamond',serif;font-size:30px;letter-spacing:.14em;color:#B8975A}
+.op-mono span{font-size:20px;color:#C9AE74}
+.op-rule{display:block;height:1px;width:70px;margin:14px 0;background:linear-gradient(90deg,transparent,#C9AE74,transparent)}
 .op-eyebrow{margin:0 0 12px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:#5A6A8A}
 .op-invite{margin:0 0 14px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;line-height:1.5;color:#1F2D4C}
 .op-name{margin:0;font-family:'Great Vibes',cursive;font-size:var(--name);line-height:1.15;color:#1F2D4C}
-.op-amp{margin:2px 0;font-family:'Cormorant Garamond',serif;font-size:18px;letter-spacing:.2em;color:#4275C8}
+.op-amp{margin:2px 0;font-family:'Cormorant Garamond',serif;font-size:18px;letter-spacing:.2em;color:#B8975A}
 .op-date{margin:12px 0 0;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:#5A6A8A}
-.op-cta{appearance:none;border:0;margin-top:6px;padding:14px 38px;border-radius:999px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,#3B6BB8,#7FA3DD);box-shadow:0 6px 20px rgba(66,117,200,.4);cursor:pointer;opacity:0;transform:translateY(8px);transition:opacity .5s ease .7s,transform .5s ease .7s,box-shadow .2s ease;-webkit-tap-highlight-color:transparent}
-.op-cta:hover{box-shadow:0 8px 26px rgba(66,117,200,.55)}
+.op-name,.op-amp,.op-date{opacity:0;transition:opacity .7s ease .5s}
+.op-revealed .op-name,.op-revealed .op-amp,.op-revealed .op-date{opacity:1}
+.op-cta{appearance:none;border:0;margin-top:8px;min-height:48px;padding:15px 42px;border-radius:999px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,#2E5288,#5E85C2);box-shadow:0 6px 20px rgba(46,82,136,.35),inset 0 0 0 1px rgba(233,215,168,.55);cursor:pointer;opacity:0;transform:translateY(8px);transition:opacity .5s ease .9s,transform .5s ease .9s,box-shadow .2s ease;-webkit-tap-highlight-color:transparent}
+.op-cta:hover{box-shadow:0 8px 26px rgba(46,82,136,.5),inset 0 0 0 1px rgba(233,215,168,.75)}
 .op-cta:focus-visible{outline:2px solid #1F2D4C;outline-offset:3px}
 .op-revealed .op-cta{opacity:1;transform:none}
+
+.op-petal{position:absolute;top:-40px;display:block;width:14px;height:18px;border-radius:80% 0 80% 0;background:linear-gradient(135deg,#fff,#F2DCE0);box-shadow:0 1px 3px rgba(31,58,95,.18);opacity:0;animation:opFallPetal 5s ease-in forwards;pointer-events:none;z-index:15}
+@keyframes opFallPetal{0%{opacity:0;transform:translate(0,0) rotate(0deg)}10%{opacity:.95}100%{opacity:0;transform:translate(var(--sway),calc(100svh + 60px)) rotate(var(--spin))}}
 
 @media (max-width:640px){
   .op-lead-eyebrow{font-size:11px;letter-spacing:.32em}
   .op-lead-names{font-size:32px}
   .op-hint{font-size:10px;letter-spacing:.3em}
-  .op-env-back,.op-pocket{border-radius:6px}
-  .op-stamp{font-size:12px;letter-spacing:.3em;bottom:12%}
-  .op-seal::after{inset:-7px}
+  .op-ribbon{height:18px;top:calc(var(--env-h)*.6 - 9px)}
+  .op-ribbon::after{top:4px}
+  .op-bow,.op-sprig{scale:.72}
   .op-open .op-half-l{transform:translate(-20px,42px) rotate(-32deg)}
   .op-open .op-half-r{transform:translate(20px,42px) rotate(32deg)}
-  .op-card::before{inset:8px}
-  .op-card-in{padding:30px 24px 26px}
+  .op-paper::before{inset:9px}
+  .op-paper::after{inset:13px}
+  .op-card-in{padding:32px 24px 26px}
   .op-mono{font-size:26px}
-  .op-mono span{font-size:19px}
   .op-rule{width:56px;margin:12px 0}
   .op-eyebrow{font-size:10px;margin-bottom:10px}
-  .op-invite{font-size:17px}
-  .op-amp{font-size:17px}
+  .op-invite,.op-amp{font-size:17px}
   .op-date{font-size:10px;letter-spacing:.2em}
-  .op-cta{padding:14px 34px}
-  .op-revealed .op-card{border-radius:16px;box-shadow:0 24px 64px rgba(31,58,95,.35)}
+  .op-cta{padding:15px 34px}
 }
 @media (prefers-reduced-motion:reduce){
   .op-scene *,.op-scene *::before,.op-scene *::after{transition-duration:.01s !important;transition-delay:0s !important;animation:none !important}
 }
 `;
 
-const WEDDING_STAMP = [WEDDING_DATE.getDate(), WEDDING_DATE.getMonth() + 1, WEDDING_DATE.getFullYear()].join(" · ");
+const OP_RANDOM = (() => {
+  let seed = 11;
+  return () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+})();
+
+// A softly torn paper edge for the invitation card.
+const OP_DECKLE = (() => {
+  const n = 26;
+  const pts: string[] = [];
+  const j = () => (OP_RANDOM() * 0.9).toFixed(2);
+  for (let k = 0; k <= n; k++) pts.push(`${(k / n * 100).toFixed(2)}% ${j()}%`);
+  for (let k = 1; k <= n; k++) pts.push(`${(100 - Number(j())).toFixed(2)}% ${(k / n * 100).toFixed(2)}%`);
+  for (let k = n - 1; k >= 0; k--) pts.push(`${(k / n * 100).toFixed(2)}% ${(100 - Number(j())).toFixed(2)}%`);
+  for (let k = n - 1; k >= 1; k--) pts.push(`${j()}% ${(k / n * 100).toFixed(2)}%`);
+  return `polygon(${pts.join(",")})`;
+})();
+
+const OP_BOKEH = Array.from({ length: 9 }, () => ({ x: OP_RANDOM() * 96, y: OP_RANDOM() * 94, s: 40 + Math.round(OP_RANDOM() * 90), d: -Math.round(OP_RANDOM() * 12) }));
+const OP_PETALS = Array.from({ length: 16 }, () => ({ x: 20 + OP_RANDOM() * 60, d: OP_RANDOM() * 1.6, sway: Math.round(OP_RANDOM() * 160 - 80), spin: Math.round(OP_RANDOM() * 540 - 270) }));
+const OP_LEAVES: [number, number, number][] = [[12, 8, 18], [30, 18, 16], [10, 30, 20], [31, 42, 19], [9, 56, 21], [31, 66, 18]];
 
 function OpeningScreen({ onOpen }: { onOpen: () => void }) {
-  // 0 sealed → 1 seal breaks, flap opens → 2 card rises → 3 card lifts clear → 4 card revealed
+  // 0 sealed → 1 ribbon off, seal breaks, flap opens → 2 card rises → 3 card lifts clear → 4 card revealed
   const [stage, setStage] = useState(0);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const ctaRef = useRef<HTMLButtonElement>(null);
+  const tiltFrame = useRef(0);
 
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  useEffect(() => () => { timers.current.forEach(clearTimeout); cancelAnimationFrame(tiltFrame.current); }, []);
   useEffect(() => { if (stage === 4) ctaRef.current?.focus({ preventScroll: true }); }, [stage]);
 
-  const breakSeal = () => {
+  const open = () => {
     if (stage > 0) return;
+    setTilt({ x: 0, y: 0 });
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setStage(4); return; }
     setStage(1);
     timers.current = [
-      setTimeout(() => setStage(2), 850),
-      setTimeout(() => setStage(3), 1800),
-      setTimeout(() => setStage(4), 2550),
+      setTimeout(() => setStage(2), 1300),
+      setTimeout(() => setStage(3), 2250),
+      setTimeout(() => setStage(4), 3000),
     ];
+  };
+
+  // Gentle tilt toward the pointer while the envelope is still sealed.
+  const onPointerMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (stage !== 0) return;
+    const { clientX, clientY } = e;
+    cancelAnimationFrame(tiltFrame.current);
+    tiltFrame.current = requestAnimationFrame(() => {
+      setTilt({ x: -(clientY / window.innerHeight - 0.5) * 7, y: (clientX / window.innerWidth - 0.5) * 9 });
+    });
   };
 
   const sceneCls = ["op-scene", stage >= 1 && "op-open", stage >= 2 && "op-rising", stage >= 3 && "op-lifted", stage >= 4 && "op-revealed"].filter(Boolean).join(" ");
 
   return (
-    <motion.div className={`${sceneCls} fixed inset-0 z-50 flex items-center justify-center overflow-hidden`} style={{ background: "linear-gradient(135deg, #E8F2FF 0%, #D8E1EB 35%, #A8C7F1 70%, #4275C8 100%)" }}>
+    <div className={`${sceneCls} fixed inset-0 z-50 flex items-center justify-center overflow-hidden`} onMouseMove={onPointerMove} onMouseLeave={() => setTilt({ x: 0, y: 0 })}>
       <style>{OPENING_CSS}</style>
-      <Particles />
-      {["top-4 left-4", "top-4 right-4 rotate-90", "bottom-4 right-4 rotate-180", "bottom-4 left-4 -rotate-90"].map((pos, i) => (
-        <motion.div key={i} initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.1, duration: 0.8 }} className={`absolute ${pos} w-20 h-20 pointer-events-none`}>
-          <svg viewBox="0 0 80 80" fill="none">
-            <path d="M4 4 Q4 40 40 40 Q4 40 4 76" stroke="rgba(66,117,200,0.5)" strokeWidth="1" fill="none" />
-            <path d="M4 4 Q40 4 40 40 Q40 4 76 4" stroke="rgba(66,117,200,0.4)" strokeWidth="1" fill="none" />
-            <circle cx="4" cy="4" r="3" fill="rgba(66,117,200,0.55)" />
-          </svg>
-        </motion.div>
+      <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
+        <defs>
+          <filter id="op-linen"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves={2} stitchTiles="stitch" /><feColorMatrix type="saturate" values="0" /></filter>
+          <pattern id="op-euc" width="64" height="64" patternUnits="userSpaceOnUse" patternTransform="rotate(-24)">
+            <path d="M6 58 Q30 34 58 6" fill="none" stroke="#8FA7C6" strokeWidth="1" />
+            <circle cx="16" cy="44" r="6" fill="none" stroke="#8FA7C6" strokeWidth="1" />
+            <circle cx="28" cy="28" r="5" fill="none" stroke="#8FA7C6" strokeWidth="1" />
+            <circle cx="40" cy="22" r="5.5" fill="none" stroke="#8FA7C6" strokeWidth="1" />
+            <circle cx="24" cy="40" r="4" fill="none" stroke="#B8975A" strokeWidth=".8" />
+            <circle cx="48" cy="12" r="4" fill="none" stroke="#8FA7C6" strokeWidth="1" />
+          </pattern>
+        </defs>
+      </svg>
+
+      {OP_BOKEH.map((b, i) => (
+        <span key={i} className="op-bokeh" style={{ left: `${b.x}%`, top: `${b.y}%`, width: b.s, height: b.s, animationDelay: `${b.d}s` }} />
       ))}
 
-      <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 1 }} className="op-env">
+      <div className="op-env" style={{ transform: `perspective(1200px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}>
         <div className="op-lead">
           <p className="op-lead-eyebrow">{GUEST_NAME}</p>
           <p className="op-lead-names">{GROOM} &amp; {BRIDE}</p>
@@ -682,15 +750,39 @@ function OpeningScreen({ onOpen }: { onOpen: () => void }) {
 
         <div className="op-env-body">
           <span className="op-env-shadow" aria-hidden="true" />
-          <span className="op-env-back" aria-hidden="true" />
+          <span className="op-env-back" aria-hidden="true">
+            <svg className="op-grain" style={{ opacity: 1, mixBlendMode: "normal" }}><rect width="100%" height="100%" fill="url(#op-euc)" opacity=".75" /></svg>
+          </span>
           <div className="op-pocket" aria-hidden="true">
-            <span className="op-pl" /><span className="op-pr" /><span className="op-pb" />
-            <p className="op-stamp">{WEDDING_STAMP}</p>
+            {["op-pl", "op-pr", "op-pb"].map((c) => (
+              <span key={c} className={c}><svg className="op-grain"><rect width="100%" height="100%" filter="url(#op-linen)" /></svg></span>
+            ))}
+            <svg className="op-edges" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <polyline points="0,0 52,57" fill="none" stroke="#C9AE74" strokeWidth="1" vectorEffect="non-scaling-stroke" opacity=".75" />
+              <polyline points="100,0 48,57" fill="none" stroke="#C9AE74" strokeWidth="1" vectorEffect="non-scaling-stroke" opacity=".75" />
+              <polyline points="0,100 50,47 100,100" fill="none" stroke="#C9AE74" strokeWidth="1" vectorEffect="non-scaling-stroke" opacity=".9" />
+            </svg>
           </div>
           <div className="op-flap" aria-hidden="true">
-            <span className="op-flap-out" /><span className="op-flap-in" />
+            <span className="op-flap-out">
+              <svg className="op-grain"><rect width="100%" height="100%" filter="url(#op-linen)" /></svg>
+              <svg className="op-edges" viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="0,0 50,100 100,0" fill="none" stroke="#C9AE74" strokeWidth="1.5" vectorEffect="non-scaling-stroke" /></svg>
+            </span>
+            <span className="op-flap-in">
+              <svg className="op-grain" style={{ opacity: 1, mixBlendMode: "normal" }}><rect width="100%" height="100%" fill="url(#op-euc)" opacity=".75" /></svg>
+            </span>
           </div>
-          <button type="button" className="op-seal" onClick={breakSeal} aria-label="Break the seal to open the invitation">
+          <span className="op-ribbon op-ribbon-l" aria-hidden="true" />
+          <span className="op-ribbon op-ribbon-r" aria-hidden="true" />
+          <span className="op-bow" aria-hidden="true">
+            <span className="op-tail op-tail-l" /><span className="op-tail op-tail-r" />
+            <span className="op-loop op-loop-l" /><span className="op-loop op-loop-r" />
+          </span>
+          <span className="op-sprig" aria-hidden="true">
+            <span className="op-stem" />
+            {OP_LEAVES.map(([left, top, size], i) => <span key={i} className="op-leaf" style={{ left, top, width: size, height: size }} />)}
+          </span>
+          <button type="button" className="op-seal" onClick={open} aria-label="Untie the ribbon and break the seal to open the invitation">
             <span className="op-seal-shadow" />
             <span className="op-half op-half-l">R&amp;A</span>
             <span className="op-half op-half-r">R&amp;A</span>
@@ -698,25 +790,32 @@ function OpeningScreen({ onOpen }: { onOpen: () => void }) {
         </div>
 
         <div className="op-card" aria-hidden={stage < 4}>
-          <div className="op-card-in">
-            <p className="op-mono">R <span>&amp;</span> A</p>
-            <span className="op-rule" />
-            <p className="op-eyebrow">{GUEST_NAME}</p>
-            <p className="op-invite">Together with our families,<br />we invite you to celebrate<br />our wedding day.</p>
-            <p className="op-name">{GROOM}</p>
-            <p className="op-amp">&amp;</p>
-            <p className="op-name">{BRIDE}</p>
-            <p className="op-date">{DATE_DISPLAY}</p>
-            <span className="op-rule" />
-            <button ref={ctaRef} type="button" className="op-cta" onClick={onOpen} disabled={stage < 4}>
-              Open Invitation
-            </button>
+          <div className="op-paper" style={{ clipPath: OP_DECKLE }}>
+            <svg className="op-grain" style={{ opacity: 0.1 }}><rect width="100%" height="100%" filter="url(#op-linen)" /></svg>
+            <div className="op-card-in">
+              <p className="op-mono">R <span>&amp;</span> A</p>
+              <span className="op-rule" />
+              <p className="op-eyebrow">{GUEST_NAME}</p>
+              <p className="op-invite">Together with our families,<br />we invite you to celebrate<br />our wedding day.</p>
+              <p className="op-name">{GROOM}</p>
+              <p className="op-amp">&amp;</p>
+              <p className="op-name">{BRIDE}</p>
+              <p className="op-date">{DATE_DISPLAY}</p>
+              <span className="op-rule" />
+              <button ref={ctaRef} type="button" className="op-cta" onClick={onOpen} disabled={stage < 4}>
+                Open Invitation
+              </button>
+            </div>
           </div>
         </div>
 
         <p className="op-hint">Tap the seal to open</p>
-      </motion.div>
-    </motion.div>
+      </div>
+
+      {stage >= 4 && OP_PETALS.map((p, i) => (
+        <span key={i} className="op-petal" style={{ left: `${p.x}%`, animationDelay: `${p.d}s`, "--sway": `${p.sway}px`, "--spin": `${p.spin}deg` } as CSSProperties} />
+      ))}
+    </div>
   );
 }
 
