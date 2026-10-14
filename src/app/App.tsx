@@ -21,24 +21,35 @@ const GUEST_NAME = "Dearest Guest";
 const ADMIN_PASSWORD = "GieroAC22";
 
 const MUSIC_URL = "/music/Worththewait.mp3";
-const HERO_IMG = "/images/bg_image.JPG";
+// Resized WebP copies of the photos (location data stripped); originals stay in public/images.
+const OPT_IMG = "/images/optimized";
+const HERO_IMG = `${OPT_IMG}/bg-image-1920.webp`;
+const HERO_SRCSET = `${OPT_IMG}/bg-image-1280.webp 960w, ${OPT_IMG}/bg-image-1920.webp 1440w`;
 
 interface GalleryItem {
   url: string;
+  srcSet: string;
   alt: string;
   span: string;
 }
 
+const galleryPhoto = (stem: string, alt: string, span: string): GalleryItem => ({
+  url: `${OPT_IMG}/${stem}-1200.webp`,
+  srcSet: `${OPT_IMG}/${stem}-1200.webp 900w, ${OPT_IMG}/${stem}-2048.webp 1536w`,
+  alt,
+  span,
+});
+
 const GALLERY: GalleryItem[] = [
-  { url: "/images/1a.jpg", alt: "Couple portraits", span: "lg:col-span-2 lg:row-span-2" },
-  { url: "/images/4a.JPG", alt: "Smiling guests", span: "lg:col-span-1 lg:row-span-1" },
-  { url: "/images/5a.JPG", alt: "Ceremony moment", span: "lg:col-span-1 lg:row-span-1" },
-  { url: "/images/5b.JPG", alt: "Ceremony moment", span: "lg:col-span-1 lg:row-span-1" },
-  { url: "/images/2a.JPG", alt: "Reception scene", span: "lg:col-span-1 lg:row-span-1" },
-  { url: "/images/3b.jpg", alt: "Wedding invitation", span: "lg:col-span-1 lg:row-span-1" },
-  { url: "/images/6a.JPG", alt: "Couple close-up", span: "lg:col-span-2 lg:row-span-2" },
-  { url: "/images/7a.JPG", alt: "Wedding venue", span: "lg:col-span-1 lg:row-span-1" },
-  { url: "/images/8a.JPG", alt: "Wedding details", span: "lg:col-span-1 lg:row-span-1" },
+  galleryPhoto("1a", "Couple portraits", "lg:col-span-2 lg:row-span-2"),
+  galleryPhoto("4a", "Smiling guests", "lg:col-span-1 lg:row-span-1"),
+  galleryPhoto("5a", "Ceremony moment", "lg:col-span-1 lg:row-span-1"),
+  galleryPhoto("5b", "Ceremony moment", "lg:col-span-1 lg:row-span-1"),
+  galleryPhoto("2a", "Reception scene", "lg:col-span-1 lg:row-span-1"),
+  galleryPhoto("3b", "Wedding invitation", "lg:col-span-1 lg:row-span-1"),
+  galleryPhoto("6a", "Couple close-up", "lg:col-span-2 lg:row-span-2"),
+  galleryPhoto("7a", "Wedding venue", "lg:col-span-1 lg:row-span-1"),
+  galleryPhoto("8a", "Wedding details", "lg:col-span-1 lg:row-span-1"),
 ];
 
 const PRINCIPAL_SPONSORS = [
@@ -954,7 +965,7 @@ interface AttireRole {
 
 interface AttirePetal { x: number; y: number; dx: number; dy: number; rot: number; s: number; delay: number; color: string }
 
-const ENTOURAGE_IMG = "/images/entourage-images";
+const ENTOURAGE_IMG = OPT_IMG;
 
 const ENTOURAGE_PALETTE = [
   { name: "Navy", hex: "#1F3A5F" },
@@ -966,14 +977,14 @@ const ENTOURAGE_PALETTE = [
 ];
 
 const ATTIRE_ROLES: Record<AttireKey, AttireRole> = {
-  mothers: { title: "Mothers", eyebrow: "Of the bride & groom", tint: "#1F3A5F", colors: [["Navy Blue", "#1F3A5F"]], imgs: [`${ENTOURAGE_IMG}/mother1.png`, `${ENTOURAGE_IMG}/mother2.png`] },
-  fathers: { title: "Fathers", eyebrow: "Of the bride & groom", tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"]], imgs: [`${ENTOURAGE_IMG}/father1.png`, `${ENTOURAGE_IMG}/father2.png`] },
-  ninang: { title: "Ninang", eyebrow: "Female Principal Sponsors", tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"], ["Gray", "#808080"]], imgs: [`${ENTOURAGE_IMG}/ni1.png`, `${ENTOURAGE_IMG}/ni2.png`] },
-  ninong: { title: "Ninong", eyebrow: "Male Principal Sponsors", tint: "#808080", colors: [["Beige", "#D6C3A5"], ["Gray", "#808080"]], imgs: [`${ENTOURAGE_IMG}/N1.png`, `${ENTOURAGE_IMG}/N2.png`] },
-  bridesmaids: { title: "Bridesmaids", eyebrow: "& Female Secondary Sponsors", keepEyebrowOnMobile: true, tint: "#8FA7C6", colors: [["Dusty Blue", "#8FA7C6"]], imgs: [`${ENTOURAGE_IMG}/b1.png`, `${ENTOURAGE_IMG}/b3.png`] },
-  groomsmen: { title: "Groomsmen", eyebrow: "& Male Secondary Sponsors", keepEyebrowOnMobile: true, tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"], ["Black", "#1A1A1A"]], imgs: [`${ENTOURAGE_IMG}/g1.png`, `${ENTOURAGE_IMG}/g2.png`] },
-  maidens: { title: "Flower Maidens", eyebrow: "Flower Girls", tint: "#BFD7EA", colors: [["Powder Blue", "#BFD7EA"]], imgs: [`${ENTOURAGE_IMG}/m1.png`, `${ENTOURAGE_IMG}/m2.png`] },
-  bearers: { title: "Bearers", eyebrow: "Ring, Coin & Bible", tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"]], imgs: [`${ENTOURAGE_IMG}/kids.png`, `${ENTOURAGE_IMG}/kids2.png`] },
+  mothers: { title: "Mothers", eyebrow: "Of the bride & groom", tint: "#1F3A5F", colors: [["Navy Blue", "#1F3A5F"]], imgs: [`${ENTOURAGE_IMG}/mother1-720.webp`, `${ENTOURAGE_IMG}/mother2-720.webp`] },
+  fathers: { title: "Fathers", eyebrow: "Of the bride & groom", tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"]], imgs: [`${ENTOURAGE_IMG}/father1-720.webp`, `${ENTOURAGE_IMG}/father2-720.webp`] },
+  ninang: { title: "Ninang", eyebrow: "Female Principal Sponsors", tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"], ["Gray", "#808080"]], imgs: [`${ENTOURAGE_IMG}/ni1-720.webp`, `${ENTOURAGE_IMG}/ni2-720.webp`] },
+  ninong: { title: "Ninong", eyebrow: "Male Principal Sponsors", tint: "#808080", colors: [["Beige", "#D6C3A5"], ["Gray", "#808080"]], imgs: [`${ENTOURAGE_IMG}/n1-720.webp`, `${ENTOURAGE_IMG}/n2-720.webp`] },
+  bridesmaids: { title: "Bridesmaids", eyebrow: "& Female Secondary Sponsors", keepEyebrowOnMobile: true, tint: "#8FA7C6", colors: [["Dusty Blue", "#8FA7C6"]], imgs: [`${ENTOURAGE_IMG}/b1-720.webp`, `${ENTOURAGE_IMG}/b3-720.webp`] },
+  groomsmen: { title: "Groomsmen", eyebrow: "& Male Secondary Sponsors", keepEyebrowOnMobile: true, tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"], ["Black", "#1A1A1A"]], imgs: [`${ENTOURAGE_IMG}/g1-720.webp`, `${ENTOURAGE_IMG}/g2-720.webp`] },
+  maidens: { title: "Flower Maidens", eyebrow: "Flower Girls", tint: "#BFD7EA", colors: [["Powder Blue", "#BFD7EA"]], imgs: [`${ENTOURAGE_IMG}/m1-720.webp`, `${ENTOURAGE_IMG}/m2-720.webp`] },
+  bearers: { title: "Bearers", eyebrow: "Ring, Coin & Bible", tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"]], imgs: [`${ENTOURAGE_IMG}/kids-720.webp`, `${ENTOURAGE_IMG}/kids2-720.webp`] },
 };
 
 const ATTIRE_GROUPS: { label: string; shortLabel?: string; keys: [AttireKey, AttireKey] }[] = [
@@ -1056,15 +1067,15 @@ const ATTIRE_CSS = `
 .ea-chip-dot{display:block;width:16px;height:16px;border-radius:50%;border:1px solid rgba(31,45,76,.15)}
 
 .ea-guest-img{border-radius:28px;overflow:hidden;border:1px solid rgba(255,255,255,.95);box-shadow:0 14px 44px rgba(66,117,200,.16)}
-.ea-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
-.ea-panel{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.95);border-radius:24px;box-shadow:0 10px 32px rgba(66,117,200,.1);padding:28px 32px;display:flex;flex-direction:column;gap:20px}
+.ea-panels{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;justify-items:center}
+.ea-panel{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.95);border-radius:24px;box-shadow:0 10px 32px rgba(66,117,200,.1);padding:28px 32px;display:flex;flex-direction:column;gap:20px;width:min(100%,540px)}
 .ea-panel-head{display:flex;align-items:center;justify-content:center;gap:10px}
 .ea-panel-title{margin:0;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:.28em;text-transform:uppercase;color:#1F2D4C}
 .ea-swatches{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;justify-content:center}
 .ea-gsw{display:flex;flex-direction:column;align-items:center;gap:8px;width:72px;flex-shrink:0;font-family:'Montserrat',sans-serif;font-size:11px;text-align:center;color:#33415E}
 .ea-gdot{display:block;position:relative;width:44px;height:44px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 12px rgba(31,45,76,.15);overflow:hidden}
 .ea-strike{position:absolute;left:-6px;right:-6px;top:50%;height:3px;margin-top:-1px;background:#A23B4F;transform:rotate(-45deg)}
-.ea-note{margin:0;flex:1 1 160px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;line-height:1.45;color:#33415E}
+.ea-note{margin:0;flex:1 1 100%;text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;line-height:1.45;color:#33415E}
 
 @media (hover:hover){
   .ea-card:hover .ea-front{--y:-6px;--r:-1.2deg}
@@ -1291,6 +1302,13 @@ function EntourageAttire() {
 
 export default function App() {
   const [opened, setOpened] = useState(false);
+
+  useEffect(() => {
+    const hero = new Image();
+    hero.sizes = "100vw";
+    hero.srcset = HERO_SRCSET;
+    hero.src = HERO_IMG;
+  }, []);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminAuthed, setAdminAuthed] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
@@ -1700,7 +1718,7 @@ const inviteGuest = async (email: string, name?: string) => {
           {/* ── Hero ──────────────────────────────────────────────── */}
           <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0">
-              <img src={HERO_IMG} alt="Rogimer and Alyssa Camille" className="w-full h-full object-cover" />
+              <img src={HERO_IMG} srcSet={HERO_SRCSET} sizes="100vw" alt="Rogimer and Alyssa Camille" className="w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(66,117,200,0.55) 0%, rgba(18,38,63,0.72) 100%)" }} />
             </div>
             <div className="relative z-10 text-center px-6">
@@ -1835,6 +1853,10 @@ const inviteGuest = async (email: string, name?: string) => {
             {/* Image */}
             <img
               src={item.url}
+              srcSet={item.srcSet}
+              sizes="(min-width: 768px) 50vw, 100vw"
+              loading="lazy"
+              decoding="async"
               alt={item.alt}
               className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
               style={{
@@ -2206,7 +2228,7 @@ const inviteGuest = async (email: string, name?: string) => {
                 <GlassCard className="overflow-hidden border border-white/60 shadow-lg" style={{ background: "linear-gradient(135deg, rgba(255,250,245,0.92), rgba(250,245,240,0.9))", border: "1px solid rgba(218,165,105,0.2)", boxShadow: "0 12px 40px rgba(198,124,78,0.1)" }}>
                   <div className="grid gap-0 lg:grid-cols-2">
                     <div className="relative overflow-hidden min-h-[200px] lg:min-h-[280px]">
-                      <img src="/images/Spacio.jpg" alt="Spacio Caliraya" className="w-full h-full object-cover" style={{ background: "#F5EFEA" }} />
+                      <img src={`${OPT_IMG}/spacio-1600.webp`} loading="lazy" decoding="async" alt="Spacio Caliraya" className="w-full h-full object-cover" style={{ background: "#F5EFEA" }} />
                       <div className="absolute inset-0 bg-gradient-to-t from-[rgba(139,120,93,0.4)] via-transparent to-transparent" />
                     </div>
                     <div className="p-6 lg:p-8 flex flex-col justify-center">
