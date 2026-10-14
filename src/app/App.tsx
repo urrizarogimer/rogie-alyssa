@@ -29,7 +29,7 @@ interface GalleryItem {
 }
 
 const GALLERY: GalleryItem[] = [
-  { url: "/images/1a.jpg", alt: "Couple portrait", span: "lg:col-span-2 lg:row-span-2" },
+  { url: "/images/1a.jpg", alt: "Couple portraits", span: "lg:col-span-2 lg:row-span-2" },
   { url: "/images/4a.JPG", alt: "Smiling guests", span: "lg:col-span-1 lg:row-span-1" },
   { url: "/images/5a.JPG", alt: "Ceremony moment", span: "lg:col-span-1 lg:row-span-1" },
   { url: "/images/5b.JPG", alt: "Ceremony moment", span: "lg:col-span-1 lg:row-span-1" },
@@ -41,13 +41,14 @@ const GALLERY: GalleryItem[] = [
 ];
 
 const PRINCIPAL_SPONSORS = [
-  { mr: "Mr. Gerry D. Paule", mrs: "Mrs. Aline D. Paule", role: "Principal Sponsors" },
+  { mr: "Mr. Gerry T. Paule", mrs: "Mrs. Aline D. Paule", role: "Principal Sponsors" },
   { mr: "Mr. John David S. Supsupin", mrs: "Mrs. Joyce J. Supsupin", role: "Principal Sponsors" },
   { mr: "Mr. Ireneo D. Centeno III", mrs: "Mrs. Susan M. Centeno", role: "Principal Sponsors" },
   { mr: "Hon. Ireneo R. Baldovino", mrs: "Mrs. Shirley A. Corsiga", role: "Principal Sponsors" },
   { mr: "Mr. Rommel T. Gadaza", mrs: "Mrs. Melinda R. Gadaza", role: "Principal Sponsors" },
   { mr: "Mr. Ariel D. Añonuevo", mrs: "Mrs. Amor A. Ceblano", role: "Principal Sponsors" },
   { mr: "Mr. Camilo B. Acerdano", mrs: "Mrs. Maria Sirikit B. Wallace", role: "Principal Sponsors" },
+   { mr: "Mr. Noel R. Flores", mrs: "Mrs. Clarita A. Flores", role: "Principal Sponsors" },
 ];
 const WEDDING_PARTY = [
   { name: "Kevin Clester B. Arjona", role: "Best Man" },
