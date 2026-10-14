@@ -26,32 +26,6 @@ const OPT_IMG = "/images/optimized";
 const HERO_IMG = `${OPT_IMG}/bg-image-1920.webp`;
 const HERO_SRCSET = `${OPT_IMG}/bg-image-1280.webp 960w, ${OPT_IMG}/bg-image-1920.webp 1440w`;
 
-interface GalleryItem {
-  url: string;
-  srcSet: string;
-  alt: string;
-  span: string;
-}
-
-const galleryPhoto = (stem: string, alt: string, span: string): GalleryItem => ({
-  url: `${OPT_IMG}/${stem}-1200.webp`,
-  srcSet: `${OPT_IMG}/${stem}-1200.webp 900w, ${OPT_IMG}/${stem}-2048.webp 1536w`,
-  alt,
-  span,
-});
-
-const GALLERY: GalleryItem[] = [
-  galleryPhoto("1a", "Couple portraits", "lg:col-span-2 lg:row-span-2"),
-  galleryPhoto("4a", "Smiling guests", "lg:col-span-1 lg:row-span-1"),
-  galleryPhoto("5a", "Ceremony moment", "lg:col-span-1 lg:row-span-1"),
-  galleryPhoto("5b", "Ceremony moment", "lg:col-span-1 lg:row-span-1"),
-  galleryPhoto("2a", "Reception scene", "lg:col-span-1 lg:row-span-1"),
-  galleryPhoto("3b", "Wedding invitation", "lg:col-span-1 lg:row-span-1"),
-  galleryPhoto("6a", "Couple close-up", "lg:col-span-2 lg:row-span-2"),
-  galleryPhoto("7a", "Wedding venue", "lg:col-span-1 lg:row-span-1"),
-  galleryPhoto("8a", "Wedding details", "lg:col-span-1 lg:row-span-1"),
-];
-
 const PRINCIPAL_SPONSORS = [
   { mr: "Mr. Gerry T. Paule", mrs: "Mrs. Aline D. Paule", role: "Principal Sponsors" },
   { mr: "Mr. John David S. Supsupin", mrs: "Mrs. Joyce J. Supsupin", role: "Principal Sponsors" },
@@ -366,6 +340,200 @@ function CountdownCard({ value, label }: { value: number; label: string }) {
       <span className="text-5xl font-light tabular-nums" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#4275C8", lineHeight: 1 }}>{String(value).padStart(2, "0")}</span>
       <span className="mt-2 text-xs tracking-widest uppercase" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>{label}</span>
     </motion.div>
+  );
+}
+
+// ─── Gallery ──────────────────────────────────────────────────────────────────
+
+const GALLERY_INTERVAL_MS = 6000;
+
+const GALLERY_CSS = `
+.gl-layout{display:flex;gap:72px;justify-content:center;align-items:flex-start}
+.gl-stage{position:relative;flex:0 0 auto;width:510px;aspect-ratio:3/4;border-radius:28px;overflow:hidden;background:#DCE6F2;box-shadow:0 0 0 10px #fff,0 30px 70px rgba(31,58,95,.22);touch-action:pan-y}
+.gl-slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform-origin:50% 50%;transition:opacity 1.2s ease}
+.gl-slide.gl-on{opacity:1}
+.gl-kbA{animation:glKbA 7.5s ease-out forwards}
+.gl-kbB{animation:glKbB 7.5s ease-out forwards}
+@keyframes glKbA{from{transform:scale(1.03) translate(0,0)}to{transform:scale(1.13) translate(-2.2%,-1.8%)}}
+@keyframes glKbB{from{transform:scale(1.03) translate(0,0)}to{transform:scale(1.13) translate(2%,1.4%)}}
+.gl-shade{position:absolute;inset:auto 0 0 0;height:38%;background:linear-gradient(180deg,transparent,rgba(18,38,63,.55));pointer-events:none}
+.gl-expand{appearance:none;border:0;position:absolute;inset:0;width:100%;height:100%;background:transparent;cursor:zoom-in;-webkit-tap-highlight-color:transparent}
+.gl-arrow{appearance:none;border:0;position:absolute;bottom:22px;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.82);color:#1F2D4C;cursor:pointer;backdrop-filter:blur(8px);transition:transform .25s ease,background .25s ease;-webkit-tap-highlight-color:transparent}
+.gl-arrow:hover{transform:scale(1.08);background:#fff}
+.gl-arrow:focus-visible,.gl-thumb:focus-visible,.gl-lb-btn:focus-visible,.gl-expand:focus-visible{outline:2px solid #4275C8;outline-offset:3px}
+.gl-side{width:412px;display:flex;flex-direction:column;gap:22px;padding-top:6px}
+.gl-eyebrow{margin:0;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:#4275C8}
+.gl-prog{height:2px;background:rgba(66,117,200,.18);border-radius:2px;overflow:hidden}
+.gl-prog span{display:block;height:100%;width:0;background:linear-gradient(90deg,#4275C8,#86A4E4);animation:glProg ${GALLERY_INTERVAL_MS}ms linear forwards}
+.gl-prog.gl-held span{animation-play-state:paused}
+@keyframes glProg{from{width:0}to{width:100%}}
+.gl-thumbs{display:grid;grid-template-columns:repeat(3,128px);gap:14px}
+.gl-thumb{appearance:none;border:0;padding:0;width:128px;height:170px;border-radius:14px;overflow:hidden;cursor:pointer;background:#DCE6F2;opacity:.62;filter:saturate(.8);box-shadow:0 6px 16px rgba(31,58,95,.12);transition:opacity .35s ease,filter .35s ease,transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s ease;-webkit-tap-highlight-color:transparent}
+.gl-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.gl-thumb.gl-on{opacity:1;filter:none;transform:translateY(-4px);box-shadow:0 0 0 3px #fff,0 0 0 5px #4275C8,0 14px 28px rgba(31,58,95,.22)}
+@media (hover:hover){
+  .gl-thumb:hover{opacity:.95;filter:none}
+  .gl-thumb:hover img{transform:scale(1.06)}
+}
+
+.gl-lb{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(14,26,46,.9);backdrop-filter:blur(10px);animation:glFade .35s ease both;touch-action:pan-y}
+@keyframes glFade{from{opacity:0}to{opacity:1}}
+.gl-lb-frame{height:min(80vh,calc((100vw - 48px)*4/3));aspect-ratio:3/4;border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.45);animation:glPop .45s cubic-bezier(.22,1,.36,1) both}
+.gl-lb-frame img{width:100%;height:100%;object-fit:cover;display:block}
+@keyframes glPop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.gl-lb-btn{appearance:none;border:0;position:absolute;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;transition:background .2s ease;-webkit-tap-highlight-color:transparent}
+.gl-lb-btn:hover{background:rgba(255,255,255,.24)}
+.gl-dots{display:flex;gap:8px}
+.gl-dot{display:block;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);transition:background .3s ease,transform .3s ease}
+.gl-dot.gl-on{background:#fff;transform:scale(1.4)}
+
+@media (max-width:1023px){
+  .gl-layout{flex-direction:column;align-items:center;gap:22px}
+  .gl-stage{width:min(100%,480px);border-radius:22px;box-shadow:0 0 0 7px #fff,0 22px 50px rgba(31,58,95,.22)}
+  .gl-arrow{bottom:16px;width:44px;height:44px}
+  .gl-side{width:min(100%,480px);gap:10px;padding-top:0}
+  .gl-eyebrow{display:none}
+  .gl-thumbs{display:flex;gap:10px;overflow-x:auto;padding:8px 4px 10px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .gl-thumbs::-webkit-scrollbar{display:none}
+  .gl-thumb{flex:0 0 auto;width:72px;height:96px;border-radius:12px;scroll-snap-align:center}
+  .gl-thumb.gl-on{transform:translateY(-3px)}
+  .gl-lb-side{display:none}
+}
+.gl-lb-bottom{display:flex;gap:20px}
+@media (min-width:1024px){ .gl-lb-bottom{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .gl-kbA,.gl-kbB,.gl-lb,.gl-lb-frame{animation:none}
+  .gl-slide{transition:none}
+}
+`;
+
+const GALLERY_PHOTOS = ["1a", "4a", "5a", "5b", "2a", "3b", "6a", "7a", "8a"].map((stem, k, all) => ({
+  src: `${OPT_IMG}/${stem}-1200.webp`,
+  full: `${OPT_IMG}/${stem}-2048.webp`,
+  alt: `${GROOM} and ${BRIDE}, photo ${k + 1} of ${all.length}`,
+}));
+
+function GallerySection() {
+  const n = GALLERY_PHOTOS.length;
+  const [index, setIndex] = useState(0);
+  const [prevIndex, setPrevIndex] = useState(-1);
+  const [cycle, setCycle] = useState(0); // bumps on every change so the progress bar restarts
+  const [viewer, setViewer] = useState(false);
+  const [hovering, setHovering] = useState(false);
+  const elapsed = useRef(0);
+  const indexRef = useRef(0);
+  const touchX = useRef<number | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const expandRef = useRef<HTMLButtonElement>(null);
+  const reducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const playing = !viewer && !hovering && !reducedMotion;
+
+  const go = (k: number) => {
+    const next = ((k % n) + n) % n;
+    elapsed.current = 0;
+    setPrevIndex(indexRef.current);
+    indexRef.current = next;
+    setIndex(next);
+    setCycle((c) => c + 1);
+  };
+
+  useEffect(() => {
+    if (!playing) return;
+    const id = setInterval(() => {
+      if (document.hidden) return;
+      elapsed.current += 200;
+      if (elapsed.current >= GALLERY_INTERVAL_MS) go(indexRef.current + 1);
+    }, 200);
+    return () => clearInterval(id);
+  }, [playing]);
+
+  useEffect(() => {
+    if (!viewer) return;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setViewer(false);
+      if (e.key === "ArrowLeft") go(indexRef.current - 1);
+      if (e.key === "ArrowRight") go(indexRef.current + 1);
+    };
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+      expandRef.current?.focus({ preventScroll: true });
+    };
+  }, [viewer]);
+
+  const onTouchStart = (e: React.TouchEvent) => { touchX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    touchX.current = null;
+    if (Math.abs(dx) > 40) go(indexRef.current + (dx < 0 ? 1 : -1));
+  };
+
+  const arrowIcon = (dir: "left" | "right", size = 18) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={dir === "left" ? "M15 18l-6-6 6-6" : "M9 18l6-6-6-6"} />
+    </svg>
+  );
+
+  return (
+    <section id="gallery" className="relative py-28 px-6 overflow-hidden" style={{ background: "linear-gradient(180deg,#FDFEFF 0%,#F3F8FD 25%,#EAF2FA 60%,#FDFEFF 100%)" }}>
+      <style>{GALLERY_CSS}</style>
+      <div className="max-w-6xl mx-auto relative z-10">
+        <SectionHeader script="Captured Moments" title="Our Gallery" subtitle="A collection of memories wrapped in love and elegance" />
+
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="gl-layout" onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)}>
+          <div className="gl-stage" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+            {GALLERY_PHOTOS.map((photo, k) => {
+              const kb = k % 2 ? " gl-kbB" : " gl-kbA";
+              const cls = k === index ? ` gl-on${kb}` : k === prevIndex ? kb : "";
+              return <img key={photo.src} className={`gl-slide${cls}`} src={photo.src} alt={k === index ? photo.alt : ""} loading="lazy" decoding="async" />;
+            })}
+            <span className="gl-shade" aria-hidden="true" />
+            <button ref={expandRef} type="button" className="gl-expand" onClick={() => setViewer(true)} aria-label="View this photo full screen" />
+            <button type="button" className="gl-arrow" style={{ left: 22 }} onClick={() => go(index - 1)} aria-label="Previous photo">{arrowIcon("left")}</button>
+            <button type="button" className="gl-arrow" style={{ left: 78 }} onClick={() => go(index + 1)} aria-label="Next photo">{arrowIcon("right")}</button>
+          </div>
+
+          <div className="gl-side">
+            <p className="gl-eyebrow">Our Story in Frames</p>
+            <div className={`gl-prog${playing ? "" : " gl-held"}`} aria-hidden="true">
+              <span key={cycle} />
+            </div>
+            <div className="gl-thumbs">
+              {GALLERY_PHOTOS.map((photo, k) => (
+                <button key={photo.src} type="button" className={`gl-thumb${k === index ? " gl-on" : ""}`} onClick={() => go(k)} aria-label={`Show photo ${k + 1}`} aria-current={k === index}>
+                  <img src={photo.src} alt="" loading="lazy" decoding="async" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {viewer && (
+        <div className="gl-lb" role="dialog" aria-modal="true" aria-label="Photo viewer" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onClick={(e) => { if (e.target === e.currentTarget) setViewer(false); }}>
+          <div key={index} className="gl-lb-frame">
+            <img src={GALLERY_PHOTOS[index].full} alt={GALLERY_PHOTOS[index].alt} decoding="async" />
+          </div>
+          <div className="gl-dots" aria-hidden="true">
+            {GALLERY_PHOTOS.map((photo, k) => <span key={photo.src} className={`gl-dot${k === index ? " gl-on" : ""}`} />)}
+          </div>
+          <div className="gl-lb-bottom">
+            <button type="button" className="gl-lb-btn" style={{ position: "static" }} onClick={() => go(index - 1)} aria-label="Previous photo">{arrowIcon("left", 20)}</button>
+            <button type="button" className="gl-lb-btn" style={{ position: "static" }} onClick={() => go(index + 1)} aria-label="Next photo">{arrowIcon("right", 20)}</button>
+          </div>
+          <button type="button" className="gl-lb-btn gl-lb-side" style={{ left: 40, top: "50%", marginTop: -26 }} onClick={() => go(index - 1)} aria-label="Previous photo">{arrowIcon("left", 22)}</button>
+          <button type="button" className="gl-lb-btn gl-lb-side" style={{ right: 40, top: "50%", marginTop: -26 }} onClick={() => go(index + 1)} aria-label="Next photo">{arrowIcon("right", 22)}</button>
+          <button ref={closeRef} type="button" className="gl-lb-btn" style={{ right: 24, top: 24 }} onClick={() => setViewer(false)} aria-label="Close viewer">
+            <X size={20} aria-hidden="true" />
+          </button>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -1311,7 +1479,6 @@ export default function App() {
   }, []);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminAuthed, setAdminAuthed] = useState(false);
-  const [lightbox, setLightbox] = useState<string | null>(null);
   const [rsvps, setRsvps] = useState<RsvpEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1751,164 +1918,7 @@ const inviteGuest = async (email: string, name?: string) => {
           </section>
 
           {/* ── Gallery ───────────────────────────────────────────── */}
-       {/* ─── Gallery Section ───────────────────────────────────────────── */}
-<section
-  id="gallery"
-  className="relative py-28 overflow-hidden"
-  style={{
-    background:
-      "linear-gradient(180deg,#FDFEFF 0%,#F3F8FD 25%,#EAF2FA 60%,#FDFEFF 100%)",
-  }}
->
-  {/* Ambient Light */}
-  <div
-    className="absolute inset-0 pointer-events-none"
-    style={{
-      background: `
-        radial-gradient(circle at 20% 20%, rgba(190,220,250,0.18), transparent 35%),
-        radial-gradient(circle at 80% 30%, rgba(220,235,250,0.22), transparent 40%),
-        radial-gradient(circle at 50% 85%, rgba(210,225,240,0.15), transparent 45%)
-      `,
-      filter: "blur(60px)",
-    }}
-  />
-
-  {/* Floating particles */}
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {Array.from({ length: 20 }).map((_, i) => (
-      <motion.div
-        key={i}
-        animate={{
-          y: [-20, 20, -20],
-          x: [-5, 5, -5],
-          opacity: [0.1, 0.3, 0.1],
-        }}
-        transition={{
-          duration: 8 + i,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute rounded-full"
-        style={{
-          left: `${Math.random() * 100}%`,
-          top: `${Math.random() * 100}%`,
-          width: `${4 + Math.random() * 8}px`,
-          height: `${4 + Math.random() * 8}px`,
-          background:
-            "radial-gradient(circle, rgba(255,255,255,0.9), rgba(210,225,240,0.4))",
-          filter: "blur(1px)",
-        }}
-      />
-    ))}
-  </div>
-
-  <div className="max-w-7xl mx-auto px-6 relative z-10">
-    <SectionHeader
-      script="Captured Moments"
-      title="Our Gallery"
-      subtitle="A collection of memories wrapped in love and elegance"
-    />
-
-    {/* Editorial Gallery Layout */}
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[140px] md:auto-rows-[180px]">
-      {GALLERY.map((item, index) => {
-        const spans = [
-          // Mobile: all images = row-span-3
-          // Desktop: preserve your original layout
-          "row-span-3 md:col-span-2 md:row-span-3", // Photo 1
-          "row-span-3 md:col-span-2 md:row-span-2", // Photo 2
-          "row-span-3 md:col-span-1 md:row-span-2", // Photo 3
-          "row-span-3 md:col-span-1 md:row-span-2", // Photo 4
-          "row-span-3 md:col-span-2 md:row-span-4", // Photo 5
-          "row-span-3 md:col-span-2 md:row-span-3", // Photo 6
-          "row-span-3 md:col-span-1 md:row-span-2", // Photo 7
-          "row-span-3 md:col-span-2 md:row-span-2", // Photo 8
-          "row-span-3 md:col-span-1 md:row-span-2", // Photo 9
-        ];
-
-        return (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{
-              duration: 0.7,
-              delay: index * 0.08,
-            }}
-            whileHover={{
-              y: -8,
-              scale: 1.02,
-            }}
-            className={`${spans[index]} relative group cursor-pointer overflow-hidden`}
-            onClick={() => setLightbox(item.url)}
-            style={{
-              background: "rgba(255,255,255,0.72)",
-              backdropFilter: "blur(24px)",
-              border: "1px solid rgba(255,255,255,0.85)",
-              borderRadius: "24px",
-              boxShadow: "0 12px 40px rgba(115,145,180,0.12)",
-            }}
-          >
-            {/* Image */}
-            <img
-              src={item.url}
-              srcSet={item.srcSet}
-              sizes="(min-width: 768px) 50vw, 100vw"
-              loading="lazy"
-              decoding="async"
-              alt={item.alt}
-              className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
-              style={{
-                filter:
-                  "brightness(1.03) contrast(1.05) saturate(0.95)",
-              }}
-            />
-
-            {/* Frost Overlay */}
-            <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(255,255,255,0.18), rgba(180,210,240,0.12))",
-              }}
-            />
-
-            {/* Shine Effect */}
-            <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-700"
-              style={{
-                background:
-                  "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%)",
-                transform: "translateX(-100%)",
-                animation: "shine 4s infinite",
-              }}
-            />
-          </motion.div>
-        );
-      })}
-    </div>
-  </div>
-
-  <style>{`
-    @keyframes shine {
-      from {
-        transform: translateX(-100%);
-      }
-      to {
-        transform: translateX(100%);
-      }
-    }
-  `}
-
-     
-  
-  
-  
-  </style>
-</section>
-
-          
+          <GallerySection />
 
        {/* ── Sponsors ──────────────────────────────────────────── */}
 <section id="sponsors" className="py-24 px-6" style={{ background: "linear-gradient(180deg, #F6F9FF 0%, #E8F2FF 100%)" }}>

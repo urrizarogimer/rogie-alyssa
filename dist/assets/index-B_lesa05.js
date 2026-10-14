@@ -1079,8 +1079,8 @@ body{font-family:${Oe};background: linear-gradient(180deg, #eef6fb 0%, #f9f8ff 1
 .ea-chip-dot{display:block;width:16px;height:16px;border-radius:50%;border:1px solid rgba(31,45,76,.15)}
 
 .ea-guest-img{border-radius:28px;overflow:hidden;border:1px solid rgba(255,255,255,.95);box-shadow:0 14px 44px rgba(66,117,200,.16)}
-.ea-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
-.ea-panel{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.95);border-radius:24px;box-shadow:0 10px 32px rgba(66,117,200,.1);padding:28px 32px;display:flex;flex-direction:column;gap:20px}
+.ea-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;justify-items:center}
+.ea-panel{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.95);border-radius:24px;box-shadow:0 10px 32px rgba(66,117,200,.1);padding:28px 32px;display:flex;flex-direction:column;gap:20px;width:min(100%,540px)}
 .ea-panel-head{display:flex;align-items:center;justify-content:center;gap:10px}
 .ea-panel-title{margin:0;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:.28em;text-transform:uppercase;color:#1F2D4C}
 .ea-swatches{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;justify-content:center}
