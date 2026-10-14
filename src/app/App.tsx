@@ -5,7 +5,7 @@ import {
   MapPin, Clock, Heart, X, Check, ChevronRight, ChevronLeft,
   Calendar, Users, Star, Search, Filter, Download, Trash2,
   CheckCircle, XCircle, Clock3, LayoutDashboard, LogOut, Eye,
-  Mail, UserCheck, UserX, RefreshCw, User, Copy, Ban, QrCode,
+  Mail, UserCheck, UserX, RefreshCw, User, Ban, QrCode,
 } from "lucide-react";
 import { AdminUploadsPanel } from "./GuestUploads";
 import { fetchRsvps, createRsvp, updateRsvpStatus, updateRsvpAttending, deleteRsvp as deleteRsvpDb, markAsInvited, sendConfirmationEmail, sendDeclineEmail } from "../lib/database";
@@ -1013,16 +1013,10 @@ const ATTIRE_CSS = `
 .ea-echo{position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--c);pointer-events:none;animation:eaEcho 1.1s ease-out .2s 2 both}
 @keyframes eaEcho{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.65);opacity:0}}
 .ea-pal-name{margin-top:4px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#33415E;text-align:center}
-.ea-hex{appearance:none;border:0;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.06em;color:#5A6A8A;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:999px;transition:background .2s ease,color .2s ease}
-.ea-hex:hover{background:rgba(66,117,200,.1);color:#2E5AA3}
-.ea-hex:focus-visible{outline:2px solid #4275C8;outline-offset:1px}
 .ea-hint-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 14px;min-height:40px}
 .ea-hint{margin:0;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;line-height:1.35;color:#5A6A8A;text-align:center}
 .ea-clear{appearance:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:#2E5AA3;background:rgba(255,255,255,.85);border:1px solid rgba(66,117,200,.35);border-radius:999px;padding:9px 16px;cursor:pointer;transition:background .2s ease}
 .ea-clear:hover{background:#fff}
-.ea-toast{margin:0;min-height:18px;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:.04em;color:#2E5AA3;text-align:center;opacity:0;transform:translateY(-4px);transition:opacity .25s ease,transform .25s ease}
-.ea-toast.ea-show{opacity:1;transform:none}
-
 .ea-group{display:flex;flex-direction:column;gap:28px}
 .ea-group-head{display:flex;align-items:center;justify-content:center;gap:18px}
 .ea-line{display:block;flex-shrink:0;height:1px;width:80px;background:linear-gradient(90deg,transparent,#86A4E4)}
@@ -1082,7 +1076,6 @@ const ATTIRE_CSS = `
   .ea-pal-item{min-width:0;gap:5px}
   .ea-sw{width:46px;height:46px}
   .ea-pal-name{font-size:10px;letter-spacing:.12em}
-  .ea-hex{font-size:10px;padding:6px 8px}
   .ea-hint{font-size:16px}
   .ea-group{gap:18px}
   .ea-group-head{gap:12px}
@@ -1128,10 +1121,6 @@ function EntourageAttire() {
   const [filter, setFilter] = useState<string | null>(null);
   const [clicks, setClicks] = useState(0);
   const [burst, setBurst] = useState<{ key: AttireKey; petals: AttirePetal[] } | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => () => clearTimeout(toastTimer.current), []);
 
   const hexesOf = (key: AttireKey) => ATTIRE_ROLES[key].colors.map(([, hex]) => hex);
   const selectedHexes = selected ? hexesOf(selected) : [];
@@ -1170,20 +1159,6 @@ function EntourageAttire() {
     setBurst(null);
   };
 
-  const showToast = (msg: string) => {
-    setToast(msg);
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 1800);
-  };
-
-  const copyHex = (hex: string) => {
-    if (!navigator.clipboard) { showToast(`Couldn’t copy — the code is ${hex}`); return; }
-    navigator.clipboard.writeText(hex).then(
-      () => showToast(`Copied ${hex}`),
-      () => showToast(`Couldn’t copy — the code is ${hex}`),
-    );
-  };
-
   const filterName = ENTOURAGE_PALETTE.find((p) => p.hex === filter)?.name;
   const hint = filterName
     ? `Showing who wears ${filterName}`
@@ -1210,9 +1185,6 @@ function EntourageAttire() {
                       {selectedHexes.includes(p.hex) && <span key={clicks} className="ea-echo" />}
                     </button>
                     <span className="ea-pal-name">{p.name}</span>
-                    <button type="button" className="ea-hex" onClick={() => copyHex(p.hex)} aria-label={`Copy colour code ${p.hex}`}>
-                      {p.hex}<Copy size={11} aria-hidden="true" />
-                    </button>
                   </div>
                 );
               })}
@@ -1221,7 +1193,6 @@ function EntourageAttire() {
               <p className="ea-hint">{hint}</p>
               {(selected || filter) && <button type="button" className="ea-clear" onClick={clearAll}>Clear selection</button>}
             </div>
-            <p role="status" className={`ea-toast${toast ? " ea-show" : ""}`}>{toast}</p>
           </motion.section>
 
           {/* Role groups */}
@@ -1297,17 +1268,6 @@ function EntourageAttire() {
                 <img src="/images/guest-attire.JPEG" alt="Guest attire guide: shades of green, beige and lavender for female and male guests" className="block w-full h-auto" />
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 }} className="ea-panels">
-                <div className="ea-panel">
-                  <div className="ea-panel-head">
-                    <Check size={18} strokeWidth={2} color="#3F7A55" aria-hidden="true" />
-                    <h3 className="ea-panel-title">Please Wear</h3>
-                  </div>
-                  <div className="ea-swatches ea-wear">
-                    {GUEST_WEAR.map((c) => (
-                      <span key={c.name} className="ea-gsw"><span className="ea-gdot" style={{ background: c.hex }} />{c.name}</span>
-                    ))}
-                  </div>
-                </div>
                 <div className="ea-panel">
                   <div className="ea-panel-head">
                     <Ban size={18} strokeWidth={2} color="#A23B4F" aria-hidden="true" />
