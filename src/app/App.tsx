@@ -5,8 +5,9 @@ import {
   MapPin, Clock, Heart, X, Check, ChevronRight, ChevronLeft,
   Calendar, Users, Star, Search, Filter, Download, Trash2,
   CheckCircle, XCircle, Clock3, LayoutDashboard, LogOut, Eye,
-  Mail, UserCheck, UserX, RefreshCw, User,
+  Mail, UserCheck, UserX, RefreshCw, User, Copy, Ban, QrCode,
 } from "lucide-react";
+import { AdminUploadsPanel } from "./GuestUploads";
 import { fetchRsvps, createRsvp, updateRsvpStatus, updateRsvpAttending, deleteRsvp as deleteRsvpDb, markAsInvited, sendConfirmationEmail, sendDeclineEmail } from "../lib/database";
 
 
@@ -359,9 +360,130 @@ function CountdownCard({ value, label }: { value: number; label: string }) {
 
 // ─── Opening Screen ───────────────────────────────────────────────────────────
 
+const OPENING_CSS = `
+.op-scene{--env-w:520px;--env-h:340px;--env-offset:70px;--seal:78px;--card-top-in:16px;--card-w-in:470px;--card-h-in:310px;--card-w:430px;--card-h:min(520px,calc(100svh - 48px));--rise:-190px;--lift:-260px;--env-dip:90px;--name:52px;--final-y:calc(var(--env-h)/2 - var(--env-offset) - var(--card-top-in) - var(--card-h)/2)}
+@media (max-width:640px){
+  .op-scene{--env-w:min(340px,calc(100vw - 40px));--env-h:calc(var(--env-w)*.66);--env-offset:40px;--seal:60px;--card-top-in:12px;--card-w-in:calc(var(--env-w)*.9);--card-h-in:calc(var(--env-h)*.91);--card-w:min(340px,calc(100vw - 32px));--card-h:min(500px,calc(100svh - 40px));--rise:calc(var(--env-h)*-.49);--lift:calc(var(--env-h)*-.67);--env-dip:80px;--name:44px}
+}
+
+.op-lead{position:absolute;left:50%;bottom:calc(100% + 40px);width:max-content;max-width:calc(100vw - 32px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;transition:opacity .5s ease,transform .5s ease}
+.op-lead-eyebrow{margin:0;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:#1F2D4C}
+.op-lead-names{margin:0;font-family:'Great Vibes',cursive;font-size:40px;line-height:1.2;color:#1F2D4C}
+.op-hint{position:absolute;left:0;right:0;top:calc(100% + 44px);margin:0;text-align:center;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.32em;text-transform:uppercase;color:#1F2D4C;animation:opBreathe 2.4s ease-in-out infinite;transition:opacity .5s ease}
+@keyframes opBreathe{0%,100%{opacity:.55}50%{opacity:1}}
+.op-open .op-lead{opacity:0;transform:translateX(-50%) translateY(-10px);pointer-events:none}
+.op-open .op-hint{opacity:0;animation:none}
+
+.op-env{position:relative;z-index:1;width:var(--env-w);height:var(--env-h);margin-top:calc(var(--env-offset)*2)}
+.op-env-body{position:absolute;inset:0}
+.op-env-shadow,.op-env-back,.op-pocket,.op-seal{transition:transform .8s cubic-bezier(.22,1,.36,1)}
+.op-lifted .op-env-shadow,.op-lifted .op-env-back,.op-lifted .op-pocket,.op-lifted .op-seal{transform:translateY(var(--env-dip))}
+.op-revealed .op-env-body{transform:translateY(calc(var(--env-h)*1.8)) rotate(5deg);opacity:0;transition:transform .9s cubic-bezier(.55,0,.8,.3),opacity .7s ease .2s}
+.op-env-shadow{position:absolute;left:5%;right:5%;bottom:-22px;height:34px;border-radius:50%;background:rgba(31,58,95,.32);filter:blur(18px)}
+.op-env-back{position:absolute;inset:0;z-index:1;border-radius:8px;background-color:#BCCDE4;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.18) 0 6px,transparent 6px 12px)}
+.op-pocket{position:absolute;inset:0;z-index:3;border-radius:8px;overflow:hidden;pointer-events:none}
+.op-pocket span{position:absolute;inset:0;display:block}
+.op-pl{background:#D8E3F1;clip-path:polygon(0 0,52% 57%,0 100%)}
+.op-pr{background:#D1DDEE;clip-path:polygon(100% 0,48% 57%,100% 100%)}
+.op-pb{background:#E3EBF6;clip-path:polygon(0 100%,50% 47%,100% 100%)}
+.op-stamp{position:absolute;left:0;right:0;bottom:14%;margin:0;text-align:center;font-family:'Cormorant Garamond',serif;font-size:14px;letter-spacing:.34em;color:#6B7C9D}
+
+.op-flap{position:absolute;left:0;top:0;width:100%;height:calc(var(--env-h)*.6);z-index:4;transform-origin:50% 0;transform:translateY(0) perspective(1400px) rotateX(0deg);transform-style:preserve-3d;transition:transform .8s cubic-bezier(.45,0,.2,1) .25s,z-index 0s linear .65s}
+.op-flap span{position:absolute;inset:0;display:block;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.op-flap-out{background:linear-gradient(180deg,#D3DFEF 0%,#C6D6EB 100%);clip-path:polygon(0 0,100% 0,50% 100%)}
+.op-flap-in{background:#B3C6E0;clip-path:polygon(50% 0,100% 100%,0 100%);transform:rotateX(180deg)}
+.op-open .op-flap{transform:translateY(0) perspective(1400px) rotateX(180deg);z-index:0}
+.op-lifted .op-flap{transform:translateY(var(--env-dip)) perspective(1400px) rotateX(180deg);transition:transform .8s cubic-bezier(.22,1,.36,1)}
+
+.op-seal{position:absolute;left:50%;top:calc(var(--env-h)*.6 - var(--seal)/2);width:var(--seal);height:var(--seal);margin-left:calc(var(--seal)/-2);z-index:6;appearance:none;border:0;padding:0;background:transparent;cursor:pointer;animation:opSealPulse 2.4s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
+.op-seal:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:50%}
+.op-seal::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(255,255,255,.7);animation:opRing 2.4s ease-out infinite;pointer-events:none}
+@keyframes opSealPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes opRing{0%{transform:scale(.85);opacity:.8}100%{transform:scale(1.45);opacity:0}}
+.op-seal-shadow{position:absolute;inset:6%;border-radius:50%;background:rgba(20,35,60,.45);filter:blur(7px);transform:translateY(5px);transition:opacity .3s ease}
+.op-half{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:47% 53% 51% 49%/52% 47% 53% 48%;background:radial-gradient(circle at 34% 30%,rgb(109,127,151) 0%,#1F3A5F 48%,rgb(19,35,57) 100%);box-shadow:inset 0 0 0 5px rgba(255,255,255,.1),inset 0 0 0 7px rgba(0,0,0,.16);font-family:'Cormorant Garamond',serif;font-weight:600;font-size:calc(var(--seal)*.3);letter-spacing:.02em;color:rgba(255,255,255,.66);text-shadow:0 -1px 0 rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.12);transition:transform .65s cubic-bezier(.3,0,.6,1),opacity .5s ease .12s}
+.op-half-l{clip-path:polygon(0 0,53% 0,46% 34%,56% 58%,47% 100%,0 100%)}
+.op-half-r{clip-path:polygon(53% 0,100% 0,100% 100%,47% 100%,56% 58%,46% 34%)}
+.op-open .op-seal{animation:none;pointer-events:none}
+.op-open .op-seal::after{display:none}
+.op-open .op-seal-shadow{opacity:0}
+.op-open .op-half-l{transform:translate(-26px,52px) rotate(-32deg);opacity:0}
+.op-open .op-half-r{transform:translate(26px,52px) rotate(32deg);opacity:0}
+
+.op-card{position:absolute;left:50%;top:var(--card-top-in);width:var(--card-w-in);height:var(--card-h-in);z-index:2;overflow:hidden;background:#FBFCFE;border-radius:6px;box-shadow:0 2px 10px rgba(31,58,95,.14);transform:translateX(-50%) translateY(0);transition:transform 1s cubic-bezier(.22,1,.36,1),width .9s cubic-bezier(.22,1,.36,1),height .9s cubic-bezier(.22,1,.36,1),border-radius .6s ease,box-shadow .6s ease}
+.op-card::before{content:"";position:absolute;inset:10px;border:1px solid rgba(66,117,200,.28);border-radius:4px;pointer-events:none}
+.op-rising .op-card{transform:translateX(-50%) translateY(var(--rise))}
+.op-lifted .op-card{transform:translateX(-50%) translateY(var(--lift));z-index:10;transition:transform .8s cubic-bezier(.22,1,.36,1),z-index 0s linear .6s}
+.op-revealed .op-card{width:var(--card-w);height:var(--card-h);transform:translateX(-50%) translateY(var(--final-y));border-radius:18px;box-shadow:0 30px 80px rgba(31,58,95,.35);overflow-y:auto;animation:opFloat 5s ease-in-out 1.2s infinite}
+@keyframes opFloat{0%,100%{margin-top:0}50%{margin-top:-6px}}
+
+.op-card-in{display:flex;flex-direction:column;align-items:center;text-align:center;padding:36px 30px 30px;box-sizing:border-box}
+.op-mono{margin:0;font-family:'Cormorant Garamond',serif;font-size:30px;letter-spacing:.12em;color:#8EA9CC}
+.op-mono span{font-size:22px;color:#AAB6C5}
+.op-rule{display:block;height:1px;width:64px;margin:14px 0;background:linear-gradient(90deg,transparent,#86A4E4,transparent)}
+.op-eyebrow{margin:0 0 12px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:#5A6A8A}
+.op-invite{margin:0 0 14px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;line-height:1.5;color:#1F2D4C}
+.op-name{margin:0;font-family:'Great Vibes',cursive;font-size:var(--name);line-height:1.15;color:#1F2D4C}
+.op-amp{margin:2px 0;font-family:'Cormorant Garamond',serif;font-size:18px;letter-spacing:.2em;color:#4275C8}
+.op-date{margin:12px 0 0;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:#5A6A8A}
+.op-cta{appearance:none;border:0;margin-top:6px;padding:14px 38px;border-radius:999px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,#3B6BB8,#7FA3DD);box-shadow:0 6px 20px rgba(66,117,200,.4);cursor:pointer;opacity:0;transform:translateY(8px);transition:opacity .5s ease .7s,transform .5s ease .7s,box-shadow .2s ease;-webkit-tap-highlight-color:transparent}
+.op-cta:hover{box-shadow:0 8px 26px rgba(66,117,200,.55)}
+.op-cta:focus-visible{outline:2px solid #1F2D4C;outline-offset:3px}
+.op-revealed .op-cta{opacity:1;transform:none}
+
+@media (max-width:640px){
+  .op-lead-eyebrow{font-size:11px;letter-spacing:.32em}
+  .op-lead-names{font-size:32px}
+  .op-hint{font-size:10px;letter-spacing:.3em}
+  .op-env-back,.op-pocket{border-radius:6px}
+  .op-stamp{font-size:12px;letter-spacing:.3em;bottom:12%}
+  .op-seal::after{inset:-7px}
+  .op-open .op-half-l{transform:translate(-20px,42px) rotate(-32deg)}
+  .op-open .op-half-r{transform:translate(20px,42px) rotate(32deg)}
+  .op-card::before{inset:8px}
+  .op-card-in{padding:30px 24px 26px}
+  .op-mono{font-size:26px}
+  .op-mono span{font-size:19px}
+  .op-rule{width:56px;margin:12px 0}
+  .op-eyebrow{font-size:10px;margin-bottom:10px}
+  .op-invite{font-size:17px}
+  .op-amp{font-size:17px}
+  .op-date{font-size:10px;letter-spacing:.2em}
+  .op-cta{padding:14px 34px}
+  .op-revealed .op-card{border-radius:16px;box-shadow:0 24px 64px rgba(31,58,95,.35)}
+}
+@media (prefers-reduced-motion:reduce){
+  .op-scene *,.op-scene *::before,.op-scene *::after{transition-duration:.01s !important;transition-delay:0s !important;animation:none !important}
+}
+`;
+
+const WEDDING_STAMP = [WEDDING_DATE.getDate(), WEDDING_DATE.getMonth() + 1, WEDDING_DATE.getFullYear()].join(" · ");
+
 function OpeningScreen({ onOpen }: { onOpen: () => void }) {
+  // 0 sealed → 1 seal breaks, flap opens → 2 card rises → 3 card lifts clear → 4 card revealed
+  const [stage, setStage] = useState(0);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const ctaRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  useEffect(() => { if (stage === 4) ctaRef.current?.focus({ preventScroll: true }); }, [stage]);
+
+  const breakSeal = () => {
+    if (stage > 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setStage(4); return; }
+    setStage(1);
+    timers.current = [
+      setTimeout(() => setStage(2), 850),
+      setTimeout(() => setStage(3), 1800),
+      setTimeout(() => setStage(4), 2550),
+    ];
+  };
+
+  const sceneCls = ["op-scene", stage >= 1 && "op-open", stage >= 2 && "op-rising", stage >= 3 && "op-lifted", stage >= 4 && "op-revealed"].filter(Boolean).join(" ");
+
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "linear-gradient(135deg, #E8F2FF 0%, #D8E1EB 35%, #A8C7F1 70%, #4275C8 100%)" }}>
+    <motion.div className={`${sceneCls} fixed inset-0 z-50 flex items-center justify-center overflow-hidden`} style={{ background: "linear-gradient(135deg, #E8F2FF 0%, #D8E1EB 35%, #A8C7F1 70%, #4275C8 100%)" }}>
+      <style>{OPENING_CSS}</style>
       <Particles />
       {["top-4 left-4", "top-4 right-4 rotate-90", "bottom-4 right-4 rotate-180", "bottom-4 left-4 -rotate-90"].map((pos, i) => (
         <motion.div key={i} initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.1, duration: 0.8 }} className={`absolute ${pos} w-20 h-20 pointer-events-none`}>
@@ -372,24 +494,48 @@ function OpeningScreen({ onOpen }: { onOpen: () => void }) {
           </svg>
         </motion.div>
       ))}
-      <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 1 }} className="relative z-10 w-full max-w-md mx-6 text-center px-10 py-14 rounded-3xl" style={{ background: "rgba(255,255,255,0.55)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.75)", boxShadow: "0 16px 64px rgba(66,117,200,0.3)" }}>
-        <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.9, duration: 0.8 }} className="h-px w-16 mx-auto mb-6" style={{ background: "linear-gradient(90deg, transparent, #86A4E4, transparent)" }} />
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7, duration: 0.8 }} className="text-sm tracking-widest uppercase mb-4" style={{ fontFamily: "'Montserrat', sans-serif", color: "#6B7C9D" }}>{GUEST_NAME}</motion.p>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85, duration: 0.8 }} className="text-base mb-6 leading-relaxed" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#1F2D4C", fontStyle: "italic" }}>
-          Together with our families,<br />we invite you to celebrate<br />our wedding day.
-        </motion.p>
-        <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.15, duration: 0.9 }} className="text-5xl mb-6" style={{ fontFamily: "'Great Vibes', cursive", color: "#1F2D4C" }}>{GROOM}</motion.h1>
-    
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1, duration: 0.6 }} className="text-lg mb-2" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#4275C8", letterSpacing: "0.2em" }}>&amp;</motion.p>
-        <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, duration: 0.9 }} className="text-5xl mb-2" style={{ fontFamily: "'Great Vibes', cursive", color: "#1F2D4C" }}>{BRIDE}</motion.h1>
-        
-        <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 1.35, duration: 0.8 }} className="h-px w-16 mx-auto mb-8" style={{ background: "linear-gradient(90deg, transparent, #86A4E4, transparent)" }} />
-        <motion.button initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5, duration: 0.7 }} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} onClick={onOpen} className="px-10 py-3 rounded-full text-sm uppercase transition-all" style={{ fontFamily: "'Montserrat', sans-serif", background: "linear-gradient(135deg, #4275C8, #A8C7F1)", color: "white", boxShadow: "0 4px 20px rgba(66,117,200,0.4)", letterSpacing: "0.15em" }}>
-          Open Invitation
-        </motion.button>
-        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="mt-6">
-          <Heart size={14} fill="#86A4E4" style={{ color: "#86A4E4", margin: "0 auto" }} />
-        </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 1 }} className="op-env">
+        <div className="op-lead">
+          <p className="op-lead-eyebrow">{GUEST_NAME}</p>
+          <p className="op-lead-names">{GROOM} &amp; {BRIDE}</p>
+        </div>
+
+        <div className="op-env-body">
+          <span className="op-env-shadow" aria-hidden="true" />
+          <span className="op-env-back" aria-hidden="true" />
+          <div className="op-pocket" aria-hidden="true">
+            <span className="op-pl" /><span className="op-pr" /><span className="op-pb" />
+            <p className="op-stamp">{WEDDING_STAMP}</p>
+          </div>
+          <div className="op-flap" aria-hidden="true">
+            <span className="op-flap-out" /><span className="op-flap-in" />
+          </div>
+          <button type="button" className="op-seal" onClick={breakSeal} aria-label="Break the seal to open the invitation">
+            <span className="op-seal-shadow" />
+            <span className="op-half op-half-l">R&amp;A</span>
+            <span className="op-half op-half-r">R&amp;A</span>
+          </button>
+        </div>
+
+        <div className="op-card" aria-hidden={stage < 4}>
+          <div className="op-card-in">
+            <p className="op-mono">R <span>&amp;</span> A</p>
+            <span className="op-rule" />
+            <p className="op-eyebrow">{GUEST_NAME}</p>
+            <p className="op-invite">Together with our families,<br />we invite you to celebrate<br />our wedding day.</p>
+            <p className="op-name">{GROOM}</p>
+            <p className="op-amp">&amp;</p>
+            <p className="op-name">{BRIDE}</p>
+            <p className="op-date">{DATE_DISPLAY}</p>
+            <span className="op-rule" />
+            <button ref={ctaRef} type="button" className="op-cta" onClick={onOpen} disabled={stage < 4}>
+              Open Invitation
+            </button>
+          </div>
+        </div>
+
+        <p className="op-hint">Tap the seal to open</p>
       </motion.div>
     </motion.div>
   );
@@ -543,6 +689,7 @@ function AdminDashboard({ rsvps, onUpdate, onDelete, onInvite, onClose }: {
   const [inviteMessage, setInviteMessage] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "status" | "guests" | "invited">("status");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [tab, setTab] = useState<"rsvps" | "uploads">("rsvps");
 
   const attending = rsvps.filter((r) => r.attending === "Joyfully accepts");
   const totalGuests = attending.reduce((sum, r) => sum + parseInt(r.guests || "0"), 0);
@@ -654,9 +801,11 @@ function AdminDashboard({ rsvps, onUpdate, onDelete, onInvite, onClose }: {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {tab === "rsvps" && (
           <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all hover:opacity-80" style={{ background: "rgba(66,117,200,0.12)", color: "#86A4E4", border: "1px solid rgba(66,117,200,0.25)" }}>
             <Download size={12} /> Export CSV
           </button>
+          )}
           <button onClick={onClose} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all hover:opacity-80" style={{ background: "rgba(66,117,200,0.1)", color: "#4275C8", border: "1px solid rgba(66,117,200,0.2)" }}>
             <LogOut size={12} /> Exit
           </button>
@@ -664,6 +813,17 @@ function AdminDashboard({ rsvps, onUpdate, onDelete, onInvite, onClose }: {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
+        {/* Section tabs */}
+        <div className="flex gap-2 mb-6" role="tablist" aria-label="Admin sections">
+          {([["rsvps", "RSVPs", <Users size={13} key="i" />], ["uploads", "Photo Uploads", <QrCode size={13} key="i" />]] as const).map(([key, label, icon]) => (
+            <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => setTab(key)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs transition-all" style={{ background: tab === key ? "linear-gradient(135deg, #4275C8, #A8C7F1)" : "white", color: tab === key ? "white" : "#4275C8", border: tab === key ? "none" : "1px solid rgba(66,117,200,0.2)" }}>
+              {icon} {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "uploads" ? <AdminUploadsPanel /> : (
+        <>
         {/* Stat cards */}
 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
           {statCards.map((s, i) => (
@@ -768,6 +928,8 @@ function AdminDashboard({ rsvps, onUpdate, onDelete, onInvite, onClose }: {
             </table>
           </div>
         </div>
+        </>
+        )}
 
        
       </div>
@@ -776,6 +938,396 @@ function AdminDashboard({ rsvps, onUpdate, onDelete, onInvite, onClose }: {
 }
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
+
+// ─── Entourage Attire ─────────────────────────────────────────────────────────
+
+type AttireKey = "mothers" | "fathers" | "ninang" | "ninong" | "bridesmaids" | "groomsmen" | "maidens" | "bearers";
+
+interface AttireRole {
+  title: string;
+  eyebrow: string;
+  keepEyebrowOnMobile?: boolean;
+  tint: string;
+  colors: [name: string, hex: string][];
+  imgs: [string, string];
+}
+
+interface AttirePetal { x: number; y: number; dx: number; dy: number; rot: number; s: number; delay: number; color: string }
+
+const ENTOURAGE_IMG = "/images/entourage-images";
+
+const ENTOURAGE_PALETTE = [
+  { name: "Navy", hex: "#1F3A5F" },
+  { name: "Dusty Blue", hex: "#8FA7C6" },
+  { name: "Powder Blue", hex: "#BFD7EA" },
+  { name: "Beige", hex: "#D6C3A5" },
+  { name: "Gray", hex: "#808080" },
+  { name: "Black", hex: "#1A1A1A" },
+];
+
+const ATTIRE_ROLES: Record<AttireKey, AttireRole> = {
+  mothers: { title: "Mothers", eyebrow: "Of the bride & groom", tint: "#1F3A5F", colors: [["Navy Blue", "#1F3A5F"]], imgs: [`${ENTOURAGE_IMG}/mother1.png`, `${ENTOURAGE_IMG}/mother2.png`] },
+  fathers: { title: "Fathers", eyebrow: "Of the bride & groom", tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"]], imgs: [`${ENTOURAGE_IMG}/father1.png`, `${ENTOURAGE_IMG}/father2.png`] },
+  ninang: { title: "Ninang", eyebrow: "Female Principal Sponsors", tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"], ["Gray", "#808080"]], imgs: [`${ENTOURAGE_IMG}/ni1.png`, `${ENTOURAGE_IMG}/ni2.png`] },
+  ninong: { title: "Ninong", eyebrow: "Male Principal Sponsors", tint: "#808080", colors: [["Beige", "#D6C3A5"], ["Gray", "#808080"]], imgs: [`${ENTOURAGE_IMG}/N1.png`, `${ENTOURAGE_IMG}/N2.png`] },
+  bridesmaids: { title: "Bridesmaids", eyebrow: "& Female Secondary Sponsors", keepEyebrowOnMobile: true, tint: "#8FA7C6", colors: [["Dusty Blue", "#8FA7C6"]], imgs: [`${ENTOURAGE_IMG}/b1.png`, `${ENTOURAGE_IMG}/b3.png`] },
+  groomsmen: { title: "Groomsmen", eyebrow: "& Male Secondary Sponsors", keepEyebrowOnMobile: true, tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"], ["Black", "#1A1A1A"]], imgs: [`${ENTOURAGE_IMG}/g1.png`, `${ENTOURAGE_IMG}/g2.png`] },
+  maidens: { title: "Flower Maidens", eyebrow: "Flower Girls", tint: "#BFD7EA", colors: [["Powder Blue", "#BFD7EA"]], imgs: [`${ENTOURAGE_IMG}/m1.png`, `${ENTOURAGE_IMG}/m2.png`] },
+  bearers: { title: "Bearers", eyebrow: "Ring, Coin & Bible", tint: "#D6C3A5", colors: [["Beige", "#D6C3A5"]], imgs: [`${ENTOURAGE_IMG}/kids.png`, `${ENTOURAGE_IMG}/kids2.png`] },
+};
+
+const ATTIRE_GROUPS: { label: string; shortLabel?: string; keys: [AttireKey, AttireKey] }[] = [
+  { label: "Parents", keys: ["mothers", "fathers"] },
+  { label: "Principal Sponsors", keys: ["ninang", "ninong"] },
+  { label: "Bridal Party & Secondary Sponsors", shortLabel: "Bridal Party", keys: ["bridesmaids", "groomsmen"] },
+  { label: "The Little Ones", keys: ["maidens", "bearers"] },
+];
+
+const GUEST_WEAR = [
+  { name: "Sage Green", hex: "#A3B18A" },
+  { name: "Beige", hex: "#D6C3A5" },
+  { name: "Lavender", hex: "#B8A9C9" },
+  { name: "Soft Neutrals", hex: "#EDE6DA" },
+];
+
+const GUEST_AVOID = [
+  { name: "Blue Shades", hex: "#8FA7C6" },
+  { name: "Gray", hex: "#808080" },
+];
+
+const ATTIRE_TINT_STRENGTH = 0.38;
+
+function hexToRgba(hex: string, alpha: number) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${Math.min(alpha, 1).toFixed(3)})`;
+}
+
+const ATTIRE_CSS = `
+.ea-palette-wrap{display:flex;flex-direction:column;align-items:center;gap:18px}
+.ea-kicker{margin:0;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:#4275C8;text-align:center}
+.ea-palette{display:flex;flex-wrap:wrap;justify-content:center;gap:30px;padding:30px 44px 24px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.95);border-radius:28px;box-shadow:0 14px 44px rgba(66,117,200,.12);backdrop-filter:blur(8px)}
+.ea-pal-item{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:84px}
+.ea-sw{appearance:none;-webkit-appearance:none;margin:0;padding:0;cursor:pointer;display:block;position:relative;width:56px;height:56px;border-radius:50%;border:3px solid #fff;box-sizing:content-box;box-shadow:0 6px 16px rgba(31,45,76,.18);transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s ease;-webkit-tap-highlight-color:transparent}
+.ea-sw:focus-visible{outline:2px solid #4275C8;outline-offset:4px}
+.ea-sw.ea-on{transform:scale(1.08);box-shadow:0 0 0 3px #fff,0 0 0 5px #4275C8,0 8px 18px rgba(31,45,76,.2)}
+.ea-echo{position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--c);pointer-events:none;animation:eaEcho 1.1s ease-out .2s 2 both}
+@keyframes eaEcho{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.65);opacity:0}}
+.ea-pal-name{margin-top:4px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#33415E;text-align:center}
+.ea-hex{appearance:none;border:0;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.06em;color:#5A6A8A;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:999px;transition:background .2s ease,color .2s ease}
+.ea-hex:hover{background:rgba(66,117,200,.1);color:#2E5AA3}
+.ea-hex:focus-visible{outline:2px solid #4275C8;outline-offset:1px}
+.ea-hint-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 14px;min-height:40px}
+.ea-hint{margin:0;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;line-height:1.35;color:#5A6A8A;text-align:center}
+.ea-clear{appearance:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:#2E5AA3;background:rgba(255,255,255,.85);border:1px solid rgba(66,117,200,.35);border-radius:999px;padding:9px 16px;cursor:pointer;transition:background .2s ease}
+.ea-clear:hover{background:#fff}
+.ea-toast{margin:0;min-height:18px;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:.04em;color:#2E5AA3;text-align:center;opacity:0;transform:translateY(-4px);transition:opacity .25s ease,transform .25s ease}
+.ea-toast.ea-show{opacity:1;transform:none}
+
+.ea-group{display:flex;flex-direction:column;gap:28px}
+.ea-group-head{display:flex;align-items:center;justify-content:center;gap:18px}
+.ea-line{display:block;flex-shrink:0;height:1px;width:80px;background:linear-gradient(90deg,transparent,#86A4E4)}
+.ea-line-r{background:linear-gradient(270deg,transparent,#86A4E4)}
+.ea-group-label{margin:0;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:#4275C8;text-align:center}
+.ea-short{display:none}
+.ea-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}
+
+.ea-card{position:relative;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.95);border-radius:28px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 14px 44px rgba(66,117,200,.13);transition:transform .55s cubic-bezier(.34,1.56,.64,1),box-shadow .5s ease,opacity .45s ease,filter .45s ease}
+.ea-card.ea-sel{transform:translateY(-8px) scale(1.02);box-shadow:0 0 0 2px var(--role),0 28px 64px var(--role-a)}
+.ea-card.ea-hit{box-shadow:0 0 0 2px var(--role),0 18px 48px var(--role-a)}
+.ea-card.ea-mute{opacity:.74;filter:saturate(.8)}
+.ea-card.ea-dim{opacity:.4;filter:grayscale(.65)}
+
+.ea-stage{appearance:none;-webkit-appearance:none;border:0;margin:0;padding:0;background:transparent;font:inherit;color:inherit;cursor:pointer;display:block;width:100%;height:380px;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.ea-stage:focus-visible{outline:2px solid #4275C8;outline-offset:-6px}
+.ea-bloom{position:absolute;inset:0;display:block;transform-origin:50% 85%;opacity:.85;transition:opacity .5s ease,transform .6s ease}
+.ea-sel .ea-bloom{opacity:1;transform:scale(1.08)}
+.ea-bloom-anim{animation:eaBloom .95s cubic-bezier(.22,1,.36,1) both}
+@keyframes eaBloom{0%{transform:scale(.55);opacity:.35}55%{transform:scale(1.2);opacity:1}100%{transform:scale(1.08);opacity:1}}
+.ea-dots{position:absolute;top:18px;right:20px;display:flex;gap:6px;z-index:4}
+.ea-dots span{display:block;width:7px;height:7px;border-radius:50%;transition:background .35s ease}
+
+.ea-fig{position:absolute;bottom:14px;left:50%;height:350px;width:auto;max-width:none;transform-origin:50% 100%;transform:translateX(calc(-50% + var(--x))) translateY(var(--y)) rotate(var(--r)) scale(var(--sc));transition:transform .7s cubic-bezier(.34,1.56,.64,1),opacity .45s ease,filter .45s ease}
+.ea-front{--x:26px;--y:0px;--r:0deg;--sc:1;z-index:2;opacity:1;filter:saturate(1) drop-shadow(0 12px 18px rgba(31,45,76,.22))}
+.ea-back{--x:-38px;--y:0px;--r:0deg;--sc:.86;z-index:1;opacity:.72;filter:saturate(.8) drop-shadow(0 0 0 rgba(31,45,76,0))}
+
+.ea-petals{position:absolute;inset:0;pointer-events:none;z-index:3}
+.ea-petal{position:absolute;display:block;width:10px;height:14px;border-radius:80% 0 80% 0;opacity:0;box-shadow:0 1px 3px rgba(31,45,76,.2);animation:eaPetal 1.15s cubic-bezier(.22,1,.36,1) both}
+@keyframes eaPetal{0%{opacity:0;transform:translate(-50%,-50%) rotate(0deg) scale(.3)}15%{opacity:1}55%{opacity:1;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(var(--rot)) scale(var(--s))}100%{opacity:0;transform:translate(calc(-50% + var(--dx) * 1.2),calc(-50% + var(--dy) + 54px)) rotate(calc(var(--rot) * 1.6)) scale(var(--s))}}
+
+.ea-info{padding:22px 28px 28px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.ea-eyebrow{margin:0;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:500;letter-spacing:.28em;text-transform:uppercase;color:#5A6A8A}
+.ea-title{margin:0;font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;line-height:1.15;color:#1F2D4C}
+.ea-chips{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center}
+.ea-chip{display:flex;align-items:center;gap:8px;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:.08em;color:#33415E}
+.ea-chip-dot{display:block;width:16px;height:16px;border-radius:50%;border:1px solid rgba(31,45,76,.15)}
+
+.ea-guest-img{border-radius:28px;overflow:hidden;border:1px solid rgba(255,255,255,.95);box-shadow:0 14px 44px rgba(66,117,200,.16)}
+.ea-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.ea-panel{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.95);border-radius:24px;box-shadow:0 10px 32px rgba(66,117,200,.1);padding:28px 32px;display:flex;flex-direction:column;gap:20px}
+.ea-panel-head{display:flex;align-items:center;gap:10px}
+.ea-panel-title{margin:0;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:.28em;text-transform:uppercase;color:#1F2D4C}
+.ea-swatches{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
+.ea-gsw{display:flex;flex-direction:column;align-items:center;gap:8px;width:72px;flex-shrink:0;font-family:'Montserrat',sans-serif;font-size:11px;text-align:center;color:#33415E}
+.ea-gdot{display:block;position:relative;width:44px;height:44px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 12px rgba(31,45,76,.15);overflow:hidden}
+.ea-strike{position:absolute;left:-6px;right:-6px;top:50%;height:3px;margin-top:-1px;background:#A23B4F;transform:rotate(-45deg)}
+.ea-note{margin:0;flex:1 1 160px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;line-height:1.45;color:#33415E}
+
+@media (hover:hover){
+  .ea-card:hover .ea-front{--y:-6px;--r:-1.2deg}
+  .ea-card:hover .ea-bloom{opacity:1}
+  .ea-sw:hover{transform:scale(1.08)}
+}
+@media (max-width:640px){
+  .ea-palette{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 6px;padding:24px 10px 18px;border-radius:24px;width:100%;box-sizing:border-box}
+  .ea-pal-item{min-width:0;gap:5px}
+  .ea-sw{width:46px;height:46px}
+  .ea-pal-name{font-size:10px;letter-spacing:.12em}
+  .ea-hex{font-size:10px;padding:6px 8px}
+  .ea-hint{font-size:16px}
+  .ea-group{gap:18px}
+  .ea-group-head{gap:12px}
+  .ea-line{width:32px}
+  .ea-group-label{font-size:11px;letter-spacing:.3em}
+  .ea-has-short .ea-long{display:none}
+  .ea-has-short .ea-short{display:inline}
+  .ea-grid{gap:12px}
+  .ea-card{border-radius:22px;box-shadow:0 10px 30px rgba(66,117,200,.13)}
+  .ea-card.ea-sel{transform:translateY(-5px) scale(1.02);box-shadow:0 0 0 2px var(--role),0 20px 44px var(--role-a)}
+  .ea-stage{height:250px}
+  .ea-stage:focus-visible{outline-offset:-4px}
+  .ea-dots{top:12px;right:12px;gap:5px}
+  .ea-dots span{width:6px;height:6px}
+  .ea-fig{height:222px;bottom:10px}
+  .ea-front{--x:15px}
+  .ea-back{--x:-22px}
+  .ea-petal{width:8px;height:11px}
+  .ea-info{padding:14px 10px 18px;gap:7px}
+  .ea-eyebrow{display:none}
+  .ea-eyebrow.ea-keep{display:block;order:2;margin-top:-4px;font-size:9.5px;letter-spacing:.14em}
+  .ea-title{font-size:23px}
+  .ea-chips{order:3;gap:6px 10px}
+  .ea-chip{font-size:11px;letter-spacing:0;gap:6px}
+  .ea-chip-dot{width:13px;height:13px}
+  .ea-guest-img{border-radius:20px}
+  .ea-panels{grid-template-columns:minmax(0,1fr);gap:16px}
+  .ea-panel{padding:22px 18px;border-radius:20px;gap:16px}
+  .ea-wear{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .ea-wear .ea-gsw{width:auto;font-size:10.5px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ea-petals,.ea-echo{display:none}
+  .ea-bloom-anim{animation:none}
+  .ea-card,.ea-fig,.ea-sw{transition:opacity .3s ease}
+  .ea-card.ea-sel{transform:none}
+}
+`;
+
+function EntourageAttire() {
+  const [flipped, setFlipped] = useState<Partial<Record<AttireKey, boolean>>>({});
+  const [selected, setSelected] = useState<AttireKey | null>(null);
+  const [filter, setFilter] = useState<string | null>(null);
+  const [clicks, setClicks] = useState(0);
+  const [burst, setBurst] = useState<{ key: AttireKey; petals: AttirePetal[] } | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  const hexesOf = (key: AttireKey) => ATTIRE_ROLES[key].colors.map(([, hex]) => hex);
+  const selectedHexes = selected ? hexesOf(selected) : [];
+
+  const clearAll = () => { setSelected(null); setFilter(null); setBurst(null); };
+
+  const selectRole = (key: AttireKey) => (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    // Keyboard-triggered clicks report 0,0 — burst from the middle of the figures instead.
+    const x = e.clientX ? e.clientX - rect.left : rect.width / 2;
+    const y = e.clientY ? e.clientY - rect.top : rect.height * 0.45;
+    const compact = window.matchMedia("(max-width: 640px)").matches;
+    const colors = [...hexesOf(key), "#FFFFFF", "#E8F2FF"];
+    const petals = Array.from({ length: compact ? 6 : 10 }, (_, i) => {
+      const angle = (-90 + (Math.random() * 150 - 75)) * (Math.PI / 180);
+      const dist = (compact ? 45 : 70) + Math.random() * (compact ? 45 : 80);
+      return {
+        x: Math.round(x), y: Math.round(y),
+        dx: Math.round(Math.cos(angle) * dist), dy: Math.round(Math.sin(angle) * dist),
+        rot: Math.round(Math.random() * 360 - 180),
+        s: 0.8 + Math.random() * 0.6,
+        delay: Math.round(Math.random() * 120),
+        color: colors[i % colors.length],
+      };
+    });
+    setFlipped((f) => ({ ...f, [key]: !f[key] }));
+    setSelected(key);
+    setFilter(null);
+    setClicks((c) => c + 1);
+    setBurst({ key, petals });
+  };
+
+  const pickColor = (hex: string) => {
+    setFilter((f) => (f === hex ? null : hex));
+    setSelected(null);
+    setBurst(null);
+  };
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 1800);
+  };
+
+  const copyHex = (hex: string) => {
+    if (!navigator.clipboard) { showToast(`Couldn’t copy — the code is ${hex}`); return; }
+    navigator.clipboard.writeText(hex).then(
+      () => showToast(`Copied ${hex}`),
+      () => showToast(`Couldn’t copy — the code is ${hex}`),
+    );
+  };
+
+  const filterName = ENTOURAGE_PALETTE.find((p) => p.hex === filter)?.name;
+  const hint = filterName
+    ? `Showing who wears ${filterName}`
+    : selected
+      ? `${ATTIRE_ROLES[selected].title} — tap again to switch looks`
+      : "Tap a colour to see who wears it · Tap an outfit to switch looks";
+
+  return (
+    <section id="attire" className="py-24 px-6">
+      <style>{ATTIRE_CSS}</style>
+      <div className="max-w-[1040px] mx-auto">
+        <SectionHeader script="Dress to Celebrate" title="Entourage" subtitle="Please dress in these colours to complement our celebration" />
+
+        <div className="flex flex-col gap-11 sm:gap-16">
+          {/* Palette */}
+          <motion.section initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} aria-label="Entourage palette" className="ea-palette-wrap">
+            <p className="ea-kicker">The Entourage Palette</p>
+            <div className="ea-palette">
+              {ENTOURAGE_PALETTE.map((p) => {
+                const on = filter === p.hex;
+                return (
+                  <div key={p.hex} className="ea-pal-item">
+                    <button type="button" className={`ea-sw${on ? " ea-on" : ""}`} style={{ background: p.hex, "--c": p.hex } as CSSProperties} onClick={() => pickColor(p.hex)} aria-pressed={on} aria-label={`Show who wears ${p.name}`}>
+                      {selectedHexes.includes(p.hex) && <span key={clicks} className="ea-echo" />}
+                    </button>
+                    <span className="ea-pal-name">{p.name}</span>
+                    <button type="button" className="ea-hex" onClick={() => copyHex(p.hex)} aria-label={`Copy colour code ${p.hex}`}>
+                      {p.hex}<Copy size={11} aria-hidden="true" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="ea-hint-row">
+              <p className="ea-hint">{hint}</p>
+              {(selected || filter) && <button type="button" className="ea-clear" onClick={clearAll}>Clear selection</button>}
+            </div>
+            <p role="status" className={`ea-toast${toast ? " ea-show" : ""}`}>{toast}</p>
+          </motion.section>
+
+          {/* Role groups */}
+          {ATTIRE_GROUPS.map((g) => (
+            <motion.section key={g.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} aria-label={g.label} className="ea-group">
+              <div className="ea-group-head">
+                <span className="ea-line" />
+                <h3 className={`ea-group-label${g.shortLabel ? " ea-has-short" : ""}`}>
+                  <span className="ea-long">{g.label}</span>
+                  {g.shortLabel && <span className="ea-short">{g.shortLabel}</span>}
+                </h3>
+                <span className="ea-line ea-line-r" />
+              </div>
+              <div className="ea-grid">
+                {g.keys.map((key) => {
+                  const role = ATTIRE_ROLES[key];
+                  const isSel = selected === key;
+                  const flip = !!flipped[key];
+                  const state = isSel ? " ea-sel" : filter ? (hexesOf(key).includes(filter) ? " ea-hit" : " ea-dim") : selected ? " ea-mute" : "";
+                  const alpha = ATTIRE_TINT_STRENGTH * (isSel ? 1.3 : 1) * (key === "mothers" ? 0.7 : 1);
+                  const tint = `radial-gradient(ellipse 72% 64% at 50% 80%, ${hexToRgba(role.tint, alpha)} 0%, ${hexToRgba(role.tint, alpha * 0.35)} 48%, rgba(255,255,255,0) 76%)`;
+                  return (
+                    <article key={key} className={`ea-card${state}`} style={{ "--role": role.tint, "--role-a": hexToRgba(role.tint, 0.35), zIndex: isSel ? 2 : 1 } as CSSProperties}>
+                      <button
+                        type="button"
+                        className="ea-stage"
+                        onClick={selectRole(key)}
+                        onKeyDown={(e) => { if (e.key === "Escape") clearAll(); }}
+                        aria-pressed={isSel}
+                        aria-label={`${role.title}, showing outfit ${flip ? 2 : 1} of 2. Activate to switch outfits.`}
+                      >
+                        {/* Remounting on each click restarts the bloom animation */}
+                        <span key={isSel ? `bloom-${clicks}` : "bloom"} className={`ea-bloom${isSel ? " ea-bloom-anim" : ""}`} style={{ background: tint }} />
+                        <span className="ea-dots" aria-hidden="true">
+                          <span style={{ background: flip ? "#C9D6EC" : "#4275C8" }} />
+                          <span style={{ background: flip ? "#4275C8" : "#C9D6EC" }} />
+                        </span>
+                        <img className={`ea-fig ${flip ? "ea-back" : "ea-front"}`} src={role.imgs[0]} alt={flip ? "" : `${role.title} outfit 1 of 2`} loading="lazy" />
+                        <img className={`ea-fig ${flip ? "ea-front" : "ea-back"}`} src={role.imgs[1]} alt={flip ? `${role.title} outfit 2 of 2` : ""} loading="lazy" />
+                        {burst?.key === key && (
+                          <span key={`petals-${clicks}`} className="ea-petals" aria-hidden="true">
+                            {burst.petals.map((p, i) => (
+                              <span
+                                key={i}
+                                className="ea-petal"
+                                style={{ left: p.x, top: p.y, background: p.color, animationDelay: `${p.delay}ms`, "--dx": `${p.dx}px`, "--dy": `${p.dy}px`, "--rot": `${p.rot}deg`, "--s": p.s } as CSSProperties}
+                              />
+                            ))}
+                          </span>
+                        )}
+                      </button>
+                      <div className="ea-info">
+                        <p className={`ea-eyebrow${role.keepEyebrowOnMobile ? " ea-keep" : ""}`}>{role.eyebrow}</p>
+                        <h4 className="ea-title">{role.title}</h4>
+                        <div className="ea-chips">
+                          {role.colors.map(([name, hex]) => (
+                            <span key={name} className="ea-chip"><span className="ea-chip-dot" style={{ background: hex }} />{name}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </motion.section>
+          ))}
+
+          {/* Guest Attire */}
+          <section aria-label="Our dear guests" className="pt-6">
+            <SectionHeader title="Our Dear Guests" subtitle="Smart casual to semi-formal styling suggestions" />
+            <div className="flex flex-col gap-5 sm:gap-8">
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="ea-guest-img">
+                <img src="/images/guest-attire.JPEG" alt="Guest attire guide: shades of green, beige and lavender for female and male guests" className="block w-full h-auto" />
+              </motion.div>
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 }} className="ea-panels">
+                <div className="ea-panel">
+                  <div className="ea-panel-head">
+                    <Check size={18} strokeWidth={2} color="#3F7A55" aria-hidden="true" />
+                    <h3 className="ea-panel-title">Please Wear</h3>
+                  </div>
+                  <div className="ea-swatches ea-wear">
+                    {GUEST_WEAR.map((c) => (
+                      <span key={c.name} className="ea-gsw"><span className="ea-gdot" style={{ background: c.hex }} />{c.name}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="ea-panel">
+                  <div className="ea-panel-head">
+                    <Ban size={18} strokeWidth={2} color="#A23B4F" aria-hidden="true" />
+                    <h3 className="ea-panel-title">Kindly Avoid</h3>
+                  </div>
+                  <div className="ea-swatches">
+                    {GUEST_AVOID.map((c) => (
+                      <span key={c.name} className="ea-gsw"><span className="ea-gdot" style={{ background: c.hex }}><span className="ea-strike" /></span>{c.name}</span>
+                    ))}
+                    <p className="ea-note">Reserved for our entourage and immediate families — thank you for helping us create a beautifully coordinated celebration.</p>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function App() {
   const [opened, setOpened] = useState(false);
@@ -1684,356 +2236,7 @@ const inviteGuest = async (email: string, name?: string) => {
 
 
           {/* ── Attire ────────────────────────────────────────────── */}
-        {/* ===================== ENTIRE ATTIRE SECTION ===================== */}
-      <section id="attire" className="py-24 px-6">
-  <div className="max-w-7xl mx-auto">
-
-    {/* Entourage Header */}
-    <SectionHeader
-      script="Dress to Celebrate"
-      title="Entourage"
-      subtitle="Please dress in these colours to complement our celebration"
-    />
-
-    {/* Main Entourage Guide */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8 }}
-      className="mb-16 rounded-2xl overflow-hidden"
-      style={{ boxShadow: "0 8px 32px rgba(66,117,200,0.2)" }}
-    >
-      {/* Optional hero image */}
-    </motion.div>
-
-    {/* Individual Attire */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8 }}
-      className="mb-20"
-    >
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-
-        {/* Mothers */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-[620px]">
-          <div className="h-[420px] bg-gray-50 flex items-center justify-center p-4">
-            <img
-              src="/images/entourage-images/mother1.png"
-              alt="Mothers"
-              className="max-w-full max-h-full object-contain"
-            />
-            <img
-              src="/images/entourage-images/mother2.png"
-              alt="Mothers"
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-
-          <div className="p-5 text-center flex flex-col flex-grow">
-            <h4 className="font-semibold text-lg mb-4">
-              Mothers
-            </h4>
-
-            <div className="flex justify-center mb-3">
-              <div
-                className="w-12 h-12 rounded-full border-2 border-gray-200"
-                style={{ backgroundColor: "#1F3A5F" }}
-              />
-            </div>
-
-            <p className="text-sm text-gray-600 mt-auto">
-              Navy Blue
-            </p>
-          </div>
-        </div>
-
-        {/* Fathers */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-[620px]">
-          <div className="h-[420px] bg-gray-50 flex items-center justify-center p-4">
-            <img
-              src="/images/entourage-images/father1.png"
-              alt="Fathers"
-              className="max-w-full max-h-full object-contain"
-            />
-            <img
-              src="/images/entourage-images/father2.png"
-              alt="Fathers"
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-
-          <div className="p-5 text-center flex flex-col flex-grow">
-            <h4 className="font-semibold text-lg mb-4">
-              Fathers
-            </h4>
-
-            <div className="flex justify-center mb-3">
-              <div
-                className="w-12 h-12 rounded-full border-2 border-gray-200"
-                style={{ backgroundColor: "#D6C3A5" }}
-              />
-            </div>
-
-            <p className="text-sm text-gray-600 mt-auto">
-              Beige
-            </p>
-          </div>
-        </div>
-
-        {/* Male Principal Sponsors */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-[620px]">
-          <div className="h-[420px] bg-gray-50 flex items-center justify-center p-4">
-            <img
-              src="/images/entourage-images/N1.png"
-              alt="Male Principal Sponsors"
-              className="max-w-full max-h-full object-contain"
-            />
-            <img
-              src="/images/entourage-images/N2.png"
-              alt="Male Principal Sponsors"
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-
-          <div className="p-5 text-center flex flex-col flex-grow">
-            <h4 className="font-semibold text-lg mb-4">
-              Male Principal Sponsors
-            </h4>
-
-            <div className="flex justify-center gap-2 mb-3">
-              <div
-                className="w-12 h-12 rounded-full border"
-                style={{ backgroundColor: "#D6C3A5" }}
-              />
-              <div
-                className="w-12 h-12 rounded-full border"
-                style={{ backgroundColor: "#808080" }}
-              />
-            </div>
-
-            <p className="text-sm text-gray-600 mt-auto">
-              Beige • Gray
-            </p>
-          </div>
-        </div>
-
-        {/* Female Principal Sponsors */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-[620px]">
-          <div className="h-[420px] bg-gray-50 flex items-center justify-center p-4">
-            <img
-              src="/images/entourage-images/ni1.png"
-              alt="Female Principal Sponsors"
-              className="max-w-full max-h-full object-contain"
-            />
-            <img
-              src="/images/entourage-images/ni2.png"
-              alt="Female Principal Sponsors"
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-
-          <div className="p-5 text-center flex flex-col flex-grow">
-            <h4 className="font-semibold text-lg mb-4">
-              Female Principal Sponsors
-            </h4>
-
-            <div className="flex justify-center gap-2 mb-3">
-              <div
-                className="w-12 h-12 rounded-full border"
-                style={{ backgroundColor: "#D6C3A5" }}
-              />
-              <div
-                className="w-12 h-12 rounded-full border"
-                style={{ backgroundColor: "#808080" }}
-              />
-            </div>
-
-            <p className="text-sm text-gray-600 mt-auto">
-              Beige • Gray
-            </p>
-          </div>
-        </div>
-
-        {/* Bridesmaids */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-[620px]">
-          <div className="h-[420px] bg-gray-50 flex items-center justify-center p-4">
-            <img
-              src="/images/entourage-images/b1.png"
-              alt="Bridesmaids"
-              className="max-w-full max-h-full object-contain"
-            />
-            <img
-              src="/images/entourage-images/b3.png"
-              alt="Bridesmaids"
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-
-          <div className="p-5 text-center flex flex-col flex-grow">
-            <h4 className="font-semibold text-lg mb-4">
-              Bridesmaids / Female Secondary Sponsors
-            </h4>
-
-            <div className="flex justify-center mb-3">
-              <div
-                className="w-12 h-12 rounded-full border"
-                style={{ backgroundColor: "#8FA7C6" }}
-              />
-            </div>
-
-            <p className="text-sm text-gray-600 mt-auto">
-              Dusty Blue
-            </p>
-          </div>
-        </div>
-
-        {/* Groomsmen */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-[620px]">
-          <div className="h-[420px] bg-gray-50 flex items-center justify-center p-4">
-            <img
-              src="/images/entourage-images/g1.png"
-              alt="Groomsmen"
-              className="max-w-full max-h-full object-contain"
-            />
-            <img
-              src="/images/entourage-images/g2.png"
-              alt="Groomsmen"
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-
-          <div className="p-5 text-center flex flex-col flex-grow">
-            <h4 className="font-semibold text-lg mb-4">
-              Groomsmen / Male Secondary Sponsors
-            </h4>
-
-            <div className="flex justify-center gap-2 mb-3">
-              <div
-                className="w-12 h-12 rounded-full border"
-                style={{ backgroundColor: "#D6C3A5" }}
-              />
-            </div>
-
-            <p className="text-sm text-gray-600 mt-auto">
-              Beige • Black
-            </p>
-          </div>
-        </div>
-
-        {/* Flower Maidens */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-[620px]">
-          <div className="h-[420px] bg-gray-50 flex items-center justify-center p-4">
-            <img
-              src="/images/entourage-images/m1.png"
-              alt="Flower Maidens"
-              className="max-w-full max-h-full object-contain"
-            />
-            <img
-              src="/images/entourage-images/m2.png"
-              alt="Flower Maidens"
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-
-          <div className="p-5 text-center flex flex-col flex-grow">
-            <h4 className="font-semibold text-lg mb-4">
-              Flower Maidens
-            </h4>
-
-            <div className="flex justify-center mb-3">
-              <div
-                className="w-12 h-12 rounded-full border"
-                style={{ backgroundColor: "#BFD7EA" }}
-              />
-            </div>
-
-            <p className="text-sm text-gray-600 mt-auto">
-              Powder Blue
-            </p>
-          </div>
-        </div>
-
-        {/* Bearers */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col h-[620px]">
-          <div className="h-[420px] bg-gray-50 flex items-center justify-center p-4">
-            <img
-              src="/images/entourage-images/kids.png"
-              alt="Bearers"
-              className="max-w-full max-h-full object-contain"
-            />
-            <img
-              src="/images/entourage-images/kids2.png"
-              alt="Bearers"
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-
-          <div className="p-5 text-center flex flex-col flex-grow">
-            <h4 className="font-semibold text-lg mb-4">
-              Bearers
-            </h4>
-
-            <div className="flex justify-center mb-3">
-              <div
-                className="w-12 h-12 rounded-full border"
-                style={{ backgroundColor: "#D6C3A5" }}
-              />
-            </div>
-
-            <p className="text-sm text-gray-600 mt-auto">
-              Beige
-            </p>
-          </div>
-        </div>
-
-      </div>
-    </motion.div>
-
-
-            {/* Guest Attire */}
-            <SectionHeader
-              script=""
-              title="Our Dear Guests"
-              subtitle="Smart casual to semi-formal styling suggestions"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="mb-12 rounded-2xl overflow-hidden"
-              style={{ boxShadow: "0 8px 32px rgba(66,117,200,0.2)" }}
-            >
-              <img
-                src="/images/guest-attire.JPEG"
-                alt="Guest Attire Guide"
-                className="w-full h-auto object-cover"
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="max-w-3xl mx-auto text-center bg-white/70 backdrop-blur-sm rounded-xl p-6 border border-gray-200"
-            >
-              <p className="text-gray-700 leading-relaxed">
-                <span className="font-semibold">Kindly observe our requested dress code. </span>
-                 We respectfully ask our dear guests to avoid wearing
-                <span className="font-semibold"> shades of blue and gray</span>,
-                as these colors have been reserved exclusively for our
-                entourage and immediate families. Thank you for helping us
-                create a beautifully coordinated celebration.
-              </p>
-            </motion.div>
-
-          </div>
-        </section>
+          <EntourageAttire />
 
           {/* ── Ceremony & Reception ──────────────────────────────── */}
           <section id="ceremony" className="py-12 px-6">

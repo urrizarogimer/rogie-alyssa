@@ -1,3 +1,15 @@
+// Email clients render fonts inconsistently: Apple Mail loads web fonts, while Gmail and
+// Outlook ignore them and fall back to whatever the device has. The decorative lines are
+// therefore pre-rendered images (public/images/email), and all live text uses fonts that
+// are installed everywhere.
+const EMAIL_ASSETS = "https://rogiealyssawedding.vercel.app/images/email";
+const SERIF = "Georgia, 'Times New Roman', Times, serif";
+const SANS = "Arial, Helvetica, sans-serif";
+
+function emailImage(file: string, width: number, height: number, alt: string, altStyle: string): string {
+  return `<img src="${EMAIL_ASSETS}/${file}" width="${width}" height="${height}" alt="${alt}" style="display:block;margin:0 auto;border:0;outline:none;text-decoration:none;max-width:100%;height:auto;${altStyle}">`;
+}
+
 export function generateWeddingInvitationEmail(
   name: string,
   groomName: string,
@@ -18,7 +30,6 @@ export function generateWeddingInvitationEmail(
 
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
 *{
   margin:0;
   padding:0;
@@ -26,7 +37,7 @@ export function generateWeddingInvitationEmail(
 }
 
 body{
-  font-family:'Cormorant Garamond', Georgia, serif;
+  font-family:${SERIF};
   background: linear-gradient(180deg, #d8e6f1 0%, #eef5fb 55%, #f9fcff 100%);
   padding:28px 18px;
   color:#314860;
@@ -122,7 +133,7 @@ body{
 }
 
 .monogram{
-  font-family:'Cormorant Garamond', Georgia, serif;
+  font-family:${SERIF};
   font-size:88px;
   font-weight:400;
   color:#8ea9cc;
@@ -138,7 +149,7 @@ body{
 
 .header-subtitle{
   margin-top:18px;
-  font-family:'Segoe UI',sans-serif;
+  font-family:${SANS};
   font-size:11px;
   letter-spacing:5px;
   text-transform:uppercase;
@@ -147,7 +158,7 @@ body{
 
 .header-title{
   margin-top:22px;
-  font-family:'Cormorant Garamond', Georgia, serif;
+  font-family:${SERIF};
   font-size:58px;
   font-weight:600;
   letter-spacing:1px;
@@ -157,7 +168,7 @@ body{
 
 .header-script{
   margin-top:10px;
-  font-family:'Great Vibes', cursive, 'Cormorant Garamond', Georgia, serif;
+  font-family:${SERIF};
   font-size:28px;
   font-style:italic;
   color:#5d728e;
@@ -188,7 +199,7 @@ body{
 }
 
 .invitation-text{
-  font-family:'Segoe UI',sans-serif;
+  font-family:${SANS};
   color:#5c6f86;
   font-size:15px;
   line-height:1.9;
@@ -283,7 +294,7 @@ body{
   text-decoration:none;
   border-radius:999px;
 
-  font-family:'Segoe UI',sans-serif;
+  font-family:${SANS};
   font-size:13px;
   font-weight:700;
   letter-spacing:0.2em;
@@ -339,7 +350,7 @@ body{
 .closing-text{
   text-align:center;
 
-  font-family:'Segoe UI',sans-serif;
+  font-family:${SANS};
 
   color:#5c6f86;
   line-height:1.9;
@@ -350,7 +361,7 @@ body{
 
   text-align:center;
 
-  font-family:'Great Vibes', cursive, Georgia, serif;
+  font-family:${SERIF};
   font-size:34px;
   font-style:normal;
 
@@ -360,7 +371,7 @@ body{
 .signature-subtitle{
   margin-top:12px;
 
-  font-family:'Segoe UI',sans-serif;
+  font-family:${SANS};
 
   color:#5f88b6;
 
@@ -383,7 +394,7 @@ body{
 }
 
 .footer-text{
-  font-family:'Segoe UI',sans-serif;
+  font-family:${SANS};
   font-size:11px;
   color:#7b8fa6;
   line-height:1.8;
@@ -414,7 +425,7 @@ body{
 
 
 
-<div class="email-container">
+<div class="email-container" style="font-family:${SERIF};">
 
   <!-- STATIC PETALS -->
 
@@ -450,7 +461,7 @@ body{
     <div class="header-content">
 
   <div class="monogram">
-    R<span class="heart">♡</span>A
+    ${emailImage("invite-monogram.png", 221, 75, "R ♡ A", "font-family:" + SERIF + ";font-size:56px;color:#8ea9cc;text-align:center;")}
   </div>
 
   <div class="header-subtitle">
@@ -458,11 +469,11 @@ body{
   </div>
 
   <div class="header-title">
-    YOU'RE INVITED
+    ${emailImage("invite-youre-invited.png", 469, 51, "YOU'RE INVITED", "font-family:" + SERIF + ";font-size:40px;font-weight:bold;color:#274464;text-align:center;")}
   </div>
 
   <div class="header-script">
-    to our wedding
+    ${emailImage("invite-to-our-wedding.png", 133, 39, "to our wedding", "font-family:" + SERIF + ";font-size:22px;font-style:italic;color:#5d728e;text-align:center;")}
   </div>
 
   <div class="mini-divider">
@@ -533,7 +544,7 @@ body{
 
     <div class="signature">
 
-      With Love, ♡
+      ${emailImage("invite-with-love.png", 192, 51, "With Love, ♡", "font-family:" + SERIF + ";font-size:26px;font-style:italic;color:#2f67ae;text-align:center;")}
 
       <div class="signature-subtitle">
         ${groomName} &amp; ${brideName}
@@ -578,33 +589,32 @@ export function generateRsvpConfirmationEmail(
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Cormorant Garamond', Georgia, serif;background: linear-gradient(180deg, #eef6fb 0%, #f9f8ff 100%);padding:28px 18px;color:#324b68;}
+body{font-family:${SERIF};background: linear-gradient(180deg, #eef6fb 0%, #f9f8ff 100%);padding:28px 18px;color:#324b68;}
 .container{max-width:700px;margin:0 auto;background:#ffffff;border-radius:30px;overflow:hidden;border:1px solid rgba(139,166,201,0.24);box-shadow:0 24px 60px rgba(88,128,166,0.12);}
 .header{padding:60px 30px 40px;text-align:center;background:linear-gradient(180deg, #dcedf9 0%, #f3f8ff 100%);position:relative;}
 .header:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.16),transparent);}
-.monogram{font-family:'Cormorant Garamond', Georgia, serif;font-size:75px;color:#6085b6;letter-spacing:1px;position:relative;z-index:1;}
+.monogram{font-family:${SERIF};font-size:75px;color:#6085b6;letter-spacing:1px;position:relative;z-index:1;}
 .monogram .heart{color:#a1b6d1;font-size:48px;letter-spacing:0;}
 .subtitle{position:relative;z-index:1;margin-top:12px;font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#6f839b;}
-.title{position:relative;z-index:1;margin-top:22px;font-family:'Great Vibes', cursive, serif;font-size:46px;color:#2d567d;}
+.title{position:relative;z-index:1;margin-top:22px;font-family:${SERIF};font-size:46px;color:#2d567d;}
 .body{padding:40px 36px 50px;position:relative;z-index:1;}
 .greeting{font-size:22px;color:#2c4e71;margin-bottom:18px;}
-.text{font-family:'Segoe UI',sans-serif;color:#556d87;font-size:15px;line-height:1.9;margin-bottom:18px;}
+.text{font-family:${SANS};color:#556d87;font-size:15px;line-height:1.9;margin-bottom:18px;}
 .highlight{font-weight:600;color:#304a6a;}
 .details{background:#f6fbff;border:1px solid #dbe7f3;border-radius:20px;padding:28px;margin:30px 0;}
 .details h3{margin-bottom:16px;font-size:18px;color:#446085;}
 .details p{margin:8px 0;color:#5c7189;font-size:15px;}
 .footer{padding:26px 36px 40px;background:#f7fbff;border-top:1px solid #e1ebf5;text-align:center;color:#6e8298;font-size:13px;line-height:1.8;}
-.signature{margin-top:28px;font-family:'Great Vibes', cursive, serif;font-size:34px;color:#3c6c96;}
+.signature{margin-top:28px;font-family:${SERIF};font-size:34px;color:#3c6c96;}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container" style="font-family:${SERIF};">
   <div class="header">
-    <div class="monogram">R<span class="heart">♡</span>A</div>
+    <div class="monogram">${emailImage("rsvp-monogram.png", 166, 65, "R ♡ A", "font-family:" + SERIF + ";font-size:48px;color:#6085b6;text-align:center;")}</div>
     <div class="subtitle">RSVP CONFIRMATION</div>
-    <div class="title">Thank you for saying yes</div>
+    <div class="title">${emailImage("rsvp-title-confirmed.png", 367, 68, "Thank you for saying yes", "font-family:" + SERIF + ";font-size:30px;font-style:italic;color:#2d567d;text-align:center;")}</div>
   </div>
   <div class="body">
     <div class="greeting">Dear <strong>${name}</strong>,</div>
@@ -617,7 +627,7 @@ body{font-family:'Cormorant Garamond', Georgia, serif;background: linear-gradien
       <p><strong>Location:</strong> Spacio Caliraya, Lumban, Laguna</p>
     </div>
     <p class="text">If you need to update your RSVP, please visit our wedding website. We appreciate your love and support.</p>
-    <div class="signature">With love, ${groomName} &amp; ${brideName}</div>
+    <div class="signature">${emailImage("rsvp-signature.png", 440, 51, `With love, ${groomName} &amp; ${brideName}`, "font-family:" + SERIF + ";font-size:26px;font-style:italic;color:#3c6c96;text-align:center;")}</div>
   </div>
   <div class="footer">This is an automated confirmation email. Please do not reply to this message.</div>
 </div>
@@ -637,33 +647,32 @@ export function generateRsvpDeclineEmail(
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Cormorant Garamond', Georgia, serif;background: linear-gradient(180deg, #eef6fb 0%, #f9f8ff 100%);padding:28px 18px;color:#324b68;}
+body{font-family:${SERIF};background: linear-gradient(180deg, #eef6fb 0%, #f9f8ff 100%);padding:28px 18px;color:#324b68;}
 .container{max-width:700px;margin:0 auto;background:#ffffff;border-radius:30px;overflow:hidden;border:1px solid rgba(139,166,201,0.24);box-shadow:0 24px 60px rgba(88,128,166,0.12);}
 .header{padding:60px 30px 40px;text-align:center;background:linear-gradient(180deg, #dcedf9 0%, #f3f8ff 100%);position:relative;}
 .header:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.16),transparent);}
-.monogram{font-family:'Cormorant Garamond', Georgia, serif;font-size:75px;color:#6085b6;letter-spacing:1px;position:relative;z-index:1;}
+.monogram{font-family:${SERIF};font-size:75px;color:#6085b6;letter-spacing:1px;position:relative;z-index:1;}
 .monogram .heart{color:#a1b6d1;font-size:48px;letter-spacing:0;}
 .subtitle{position:relative;z-index:1;margin-top:12px;font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#6f839b;}
-.title{position:relative;z-index:1;margin-top:22px;font-family:'Great Vibes', cursive, serif;font-size:46px;color:#2d567d;}
+.title{position:relative;z-index:1;margin-top:22px;font-family:${SERIF};font-size:46px;color:#2d567d;}
 .body{padding:40px 36px 50px;position:relative;z-index:1;}
 .greeting{font-size:22px;color:#2c4e71;margin-bottom:18px;}
-.text{font-family:'Segoe UI',sans-serif;color:#556d87;font-size:15px;line-height:1.9;margin-bottom:18px;}
+.text{font-family:${SANS};color:#556d87;font-size:15px;line-height:1.9;margin-bottom:18px;}
 .highlight{font-weight:600;color:#304a6a;}
 .details{background:#f6fbff;border:1px solid #dbe7f3;border-radius:20px;padding:28px;margin:30px 0;}
 .details h3{margin-bottom:16px;font-size:18px;color:#446085;}
 .details p{margin:8px 0;color:#5c7189;font-size:15px;}
 .footer{padding:26px 36px 40px;background:#f7fbff;border-top:1px solid #e1ebf5;text-align:center;color:#6e8298;font-size:13px;line-height:1.8;}
-.signature{margin-top:28px;font-family:'Great Vibes', cursive, serif;font-size:34px;color:#3c6c96;}
+.signature{margin-top:28px;font-family:${SERIF};font-size:34px;color:#3c6c96;}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container" style="font-family:${SERIF};">
   <div class="header">
-    <div class="monogram">R<span class="heart">♡</span>A</div>
+    <div class="monogram">${emailImage("rsvp-monogram.png", 166, 65, "R ♡ A", "font-family:" + SERIF + ";font-size:48px;color:#6085b6;text-align:center;")}</div>
     <div class="subtitle">RSVP RECEIVED</div>
-    <div class="title">Thank you for letting us know</div>
+    <div class="title">${emailImage("rsvp-title-declined.png", 427, 68, "Thank you for letting us know", "font-family:" + SERIF + ";font-size:30px;font-style:italic;color:#2d567d;text-align:center;")}</div>
   </div>
   <div class="body">
     <div class="greeting">Dear <strong>${name}</strong>,</div>
@@ -676,7 +685,7 @@ body{font-family:'Cormorant Garamond', Georgia, serif;background: linear-gradien
       <p><strong>Location:</strong> Spacio Caliraya, Lumban, Laguna</p>
     </div>
     <p class="text">If your plans change, feel free to update your RSVP on our wedding website. Thank you again for letting us know.</p>
-    <div class="signature">With love, ${groomName} &amp; ${brideName}</div>
+    <div class="signature">${emailImage("rsvp-signature.png", 440, 51, `With love, ${groomName} &amp; ${brideName}`, "font-family:" + SERIF + ";font-size:26px;font-style:italic;color:#3c6c96;text-align:center;")}</div>
   </div>
   <div class="footer">This is an automated acknowledgement email. Please do not reply to this message.</div>
 </div>
