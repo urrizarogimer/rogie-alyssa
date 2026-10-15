@@ -1,14 +1,13 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import QRCode from "qrcode";
 import {
-  AlertCircle, Check, Download, Film, Heart, ImagePlus, Loader2, Plus, Printer, QrCode, RefreshCw, Trash2, X,
+  Check, Copy, Download, Film, Heart, ImagePlus, Loader2, Printer, RefreshCw, Trash2, X,
 } from "lucide-react";
 import {
-  MAX_UPLOAD_BYTES, createUploadTable, deleteGuestUpload, deleteUploadTable, downloadUrlFor, fetchGuestUploads,
-  fetchUploadTable, fetchUploadTables, formatBytes, signedUrlsFor, uploadGuestFile, uploadLinkFor,
-  type GuestUpload, type UploadTable,
+  MAX_UPLOAD_BYTES, UPLOAD_LINK, deleteGuestUpload, downloadUrlFor, fetchGuestUploads,
+  formatBytes, signedUrlsFor, uploadGuestFile, type GuestUpload,
 } from "../lib/uploads";
 
 const COUPLE = "Rogimer & Alyssa Camille";
@@ -19,13 +18,12 @@ const serif: CSSProperties = { fontFamily: "'Cormorant Garamond', serif" };
 const sans: CSSProperties = { fontFamily: "'Montserrat', sans-serif" };
 const script: CSSProperties = { fontFamily: "'Great Vibes', cursive" };
 
-// ─── Guest Upload Page (opened from a table's QR code) ────────────────────────
+// ─── Guest Upload Page (opened from the guest QR code) ────────────────────────
 
 type ItemStatus = "ready" | "too-big" | "uploading" | "done" | "error";
 interface PickedFile { id: string; file: File; preview: string | null; status: ItemStatus; progress: number; error?: string }
 
-export function GuestUploadPage({ tableId }: { tableId: number }) {
-  const [table, setTable] = useState<UploadTable | null | undefined>(undefined);
+export function GuestUploadPage() {
   const [name, setName] = useState(() => { try { return localStorage.getItem(NAME_STORAGE_KEY) || ""; } catch { return ""; } });
   const [items, setItems] = useState<PickedFile[]>([]);
   const [busy, setBusy] = useState(false);
@@ -33,11 +31,6 @@ export function GuestUploadPage({ tableId }: { tableId: number }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const itemsRef = useRef(items);
   itemsRef.current = items;
-
-  useEffect(() => {
-    if (!Number.isInteger(tableId) || tableId <= 0) { setTable(null); return; }
-    fetchUploadTable(tableId).then(setTable);
-  }, [tableId]);
 
   useEffect(() => () => itemsRef.current.forEach((i) => i.preview && URL.revokeObjectURL(i.preview)), []);
 
@@ -73,7 +66,6 @@ export function GuestUploadPage({ tableId }: { tableId: number }) {
   });
 
   const uploadAll = async () => {
-    if (!table) return;
     try { localStorage.setItem(NAME_STORAGE_KEY, name.trim()); } catch { /* private mode */ }
     setBusy(true);
     let failed = 0;
@@ -81,7 +73,7 @@ export function GuestUploadPage({ tableId }: { tableId: number }) {
       if (item.status !== "ready" && item.status !== "error") continue;
       patch(item.id, { status: "uploading", progress: 0, error: undefined });
       try {
-        await uploadGuestFile(item.file, table, name.trim(), (p) => patch(item.id, { progress: p }));
+        await uploadGuestFile(item.file, name.trim(), (p) => patch(item.id, { progress: p }));
         patch(item.id, { status: "done", progress: 1 });
       } catch (e) {
         failed += 1;
@@ -107,23 +99,9 @@ export function GuestUploadPage({ tableId }: { tableId: number }) {
         <div className="text-center mb-6">
           <p className="text-4xl mb-1" style={{ ...script, color: "#4275C8" }}>Share Your Moments</p>
           <p className="text-lg" style={{ ...serif, color: "#1F2D4C" }}>{COUPLE}</p>
-          {table && (
-            <span className="inline-block mt-3 px-3 py-1 rounded-full text-xs uppercase" style={{ ...sans, letterSpacing: "0.2em", background: "rgba(66,117,200,0.12)", color: "#2E5AA3" }}>{table.label}</span>
-          )}
         </div>
 
-        {table === undefined && (
-          <div className="flex justify-center py-10"><Loader2 className="animate-spin" size={24} style={{ color: "#4275C8" }} /></div>
-        )}
-
-        {table === null && (
-          <div className="text-center py-6">
-            <AlertCircle size={28} className="mx-auto mb-3" style={{ color: "#d97706" }} />
-            <p className="text-sm" style={{ ...sans, color: "#33415E" }}>This QR code isn't active. Please ask the couple's coordinator for help, or try another table's code.</p>
-          </div>
-        )}
-
-        {table && finished && (
+        {finished && (
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-4">
             <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "linear-gradient(135deg, #4275C8, #A8C7F1)" }}>
               <Check size={26} color="white" />
@@ -136,7 +114,7 @@ export function GuestUploadPage({ tableId }: { tableId: number }) {
           </motion.div>
         )}
 
-        {table && !finished && (
+        {!finished && (
           <div className="space-y-5">
             <div>
               <label htmlFor="uploader-name" className="block mb-1.5 text-xs uppercase" style={{ ...sans, letterSpacing: "0.14em", color: "#5A6A8A" }}>Your name (optional)</label>
@@ -203,29 +181,25 @@ export function GuestUploadPage({ tableId }: { tableId: number }) {
   );
 }
 
-// ─── Admin: table QR codes + upload gallery ───────────────────────────────────
+// ─── Admin: guest QR code + upload gallery ────────────────────────────────────
 
 const PRINT_CSS = `
 .qr-print-root{display:none}
 @media print{
-  @page{margin:12mm}
+  @page{margin:16mm}
   body>*:not(.qr-print-root){display:none !important}
-  .qr-print-root{display:block}
-  .qr-print-grid{display:grid;grid-template-columns:1fr 1fr;gap:10mm}
-  .qr-print-card{break-inside:avoid;page-break-inside:avoid;border:1px solid #c9d6ec;border-radius:6mm;padding:8mm 6mm;text-align:center;color:#1F2D4C}
-  .qr-print-card img{width:55mm;height:55mm;display:block;margin:4mm auto}
+  .qr-print-root{display:flex;justify-content:center}
+  .qr-print-card{width:150mm;border:1px solid #c9d6ec;border-radius:8mm;padding:14mm 10mm;text-align:center;color:#1F2D4C}
+  .qr-print-card img{width:95mm;height:95mm;display:block;margin:7mm auto}
 }
 `;
 
 export function AdminUploadsPanel() {
-  const [tables, setTables] = useState<UploadTable[]>([]);
-  const [qrImages, setQrImages] = useState<Record<number, string>>({});
-  const [newLabel, setNewLabel] = useState("");
+  const [qrImage, setQrImage] = useState("");
   const [uploads, setUploads] = useState<GuestUpload[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
-  const [tableFilter, setTableFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
 
   const loadUploads = async () => {
     setLoading(true);
@@ -236,37 +210,22 @@ export function AdminUploadsPanel() {
   };
 
   useEffect(() => {
-    fetchUploadTables().then(setTables);
+    QRCode.toDataURL(UPLOAD_LINK, { width: 900, margin: 1, errorCorrectionLevel: "M", color: { dark: "#1F2D4C", light: "#FFFFFF" } }).then(setQrImage);
     loadUploads();
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all(tables.map(async (t) => [t.id, await QRCode.toDataURL(uploadLinkFor(t.id), { width: 600, margin: 1, errorCorrectionLevel: "M", color: { dark: "#1F2D4C", light: "#FFFFFF" } })] as const))
-      .then((pairs) => { if (!cancelled) setQrImages(Object.fromEntries(pairs)); });
-    return () => { cancelled = true; };
-  }, [tables]);
+  const flash = (text: string, error = true) => { setMessage({ text, error }); setTimeout(() => setMessage(null), 4000); };
 
-  const flash = (text: string) => { setMessage(text); setTimeout(() => setMessage(""), 4000); };
-
-  const addTable = async () => {
-    const label = (newLabel.trim() || `Table ${tables.length + 1}`).slice(0, 60);
-    const created = await createUploadTable(label);
-    if (created) { setTables((t) => [...t, created]); setNewLabel(""); }
-    else flash("Couldn't add the table. Has the Supabase setup SQL been run?");
-  };
-
-  const removeTable = async (t: UploadTable) => {
-    if (!window.confirm(`Remove ${t.label}? Its QR code will stop working. Photos already uploaded are kept.`)) return;
-    if (await deleteUploadTable(t.id)) setTables((list) => list.filter((x) => x.id !== t.id));
-    else flash("Couldn't remove the table.");
-  };
-
-  const downloadQr = (t: UploadTable) => {
+  const downloadQr = () => {
     const a = document.createElement("a");
-    a.href = qrImages[t.id];
-    a.download = `${t.label.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-qr.png`;
+    a.href = qrImage;
+    a.download = "rogie-alyssa-guest-upload-qr.png";
     a.click();
+  };
+
+  const copyLink = () => {
+    if (!navigator.clipboard) { flash(`Copy this link: ${UPLOAD_LINK}`, false); return; }
+    navigator.clipboard.writeText(UPLOAD_LINK).then(() => flash("Link copied", false), () => flash(`Copy this link: ${UPLOAD_LINK}`, false));
   };
 
   const download = async (u: GuestUpload) => {
@@ -281,14 +240,13 @@ export function AdminUploadsPanel() {
     else flash("Couldn't delete the upload.");
   };
 
-  const labels = useMemo(() => Array.from(new Set(uploads.map((u) => u.table_label))), [uploads]);
-  const shown = tableFilter === "all" ? uploads : uploads.filter((u) => u.table_label === tableFilter);
   const photos = uploads.filter((u) => u.file_type.startsWith("image/")).length;
   const totalSize = uploads.reduce((sum, u) => sum + u.file_size, 0);
 
   const card = "bg-white rounded-2xl";
   const cardStyle: CSSProperties = { boxShadow: "0 2px 12px rgba(66,117,200,0.1)", border: "1px solid rgba(66,117,200,0.1)" };
-  const chip = (active: boolean): CSSProperties => ({ background: active ? "linear-gradient(135deg, #4275C8, #A8C7F1)" : "transparent", color: active ? "white" : "#6B7C9D", border: active ? "none" : "1px solid rgba(66,117,200,0.2)" });
+  const solid: CSSProperties = { background: "linear-gradient(135deg, #4275C8, #A8C7F1)", color: "white" };
+  const ghost: CSSProperties = { background: "transparent", color: "#4275C8", border: "1px solid rgba(66,117,200,0.25)" };
 
   return (
     <div className="space-y-8">
@@ -296,7 +254,7 @@ export function AdminUploadsPanel() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[["Tables", tables.length], ["Uploads", uploads.length], ["Photos / Videos", `${photos} / ${uploads.length - photos}`], ["Storage used", `${formatBytes(totalSize)} of 1 GB`]].map(([label, value]) => (
+        {[["Uploads", uploads.length], ["Photos", photos], ["Videos", uploads.length - photos], ["Storage used", `${formatBytes(totalSize)} of 1 GB`]].map(([label, value]) => (
           <div key={label} className={`${card} p-4`} style={cardStyle}>
             <p className="text-2xl font-light" style={{ ...serif, color: "#4275C8" }}>{value}</p>
             <p className="text-xs" style={{ color: "#6B7C9D" }}>{label}</p>
@@ -304,58 +262,36 @@ export function AdminUploadsPanel() {
         ))}
       </div>
 
-      {message && <p className="text-sm" style={{ color: "#B42318" }}>{message}</p>}
+      {message && <p className="text-sm" style={{ color: message.error ? "#B42318" : "#2E5AA3" }}>{message.text}</p>}
 
-      {/* Table QR codes */}
-      <section className={`${card} overflow-hidden`} style={cardStyle}>
-        <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={{ borderBottom: "1px solid rgba(66,117,200,0.1)" }}>
-          <div>
-            <h2 className="text-lg font-medium" style={{ ...serif, color: "#1F2D4C" }}>Table QR Codes</h2>
-            <p className="text-xs" style={{ color: "#6B7C9D" }}>Print one per table. Guests scan it to upload photos and videos, tagged with their table.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTable()} placeholder={`Table ${tables.length + 1}`} maxLength={60} aria-label="New table name" className="px-3 py-2 rounded-lg text-xs outline-none w-36" style={{ background: "rgba(66,117,200,0.06)", border: "1px solid rgba(66,117,200,0.18)", color: "#1F2D4C" }} />
-            <button type="button" onClick={addTable} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs" style={chip(true)}><Plus size={12} /> Add table</button>
-            <button type="button" onClick={() => window.print()} disabled={tables.length === 0} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs disabled:opacity-50" style={chip(false)}><Printer size={12} /> Print all</button>
+      {/* Guest QR code */}
+      <section className={`${card} p-6 flex flex-col sm:flex-row items-center gap-6`} style={cardStyle}>
+        <div className="w-48 h-48 flex-shrink-0 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(66,117,200,0.15)", background: "#FBFCFE" }}>
+          {qrImage && <img src={qrImage} alt="Guest upload QR code" className="w-full h-full" />}
+        </div>
+        <div className="flex-1 min-w-0 text-center sm:text-left">
+          <h2 className="text-lg font-medium" style={{ ...serif, color: "#1F2D4C" }}>Guest Upload QR Code</h2>
+          <p className="text-xs mt-1 mb-3" style={{ color: "#6B7C9D" }}>One code for every table. Guests scan it to share their photos and videos with you — no sign-in needed.</p>
+          <p className="text-xs mb-4 break-all" style={{ color: "#1F2D4C" }}>{UPLOAD_LINK}</p>
+          <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+            <button type="button" onClick={() => window.print()} disabled={!qrImage} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs disabled:opacity-50" style={solid}><Printer size={12} /> Print card</button>
+            <button type="button" onClick={downloadQr} disabled={!qrImage} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs disabled:opacity-50" style={ghost}><Download size={12} /> Download QR</button>
+            <button type="button" onClick={copyLink} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs" style={ghost}><Copy size={12} /> Copy link</button>
           </div>
         </div>
-        {tables.length === 0 ? (
-          <div className="py-12 text-center">
-            <QrCode size={28} className="mx-auto mb-2" style={{ color: "#9BB7E0" }} />
-            <p className="text-sm" style={{ color: "#6B7C9D" }}>No tables yet. Add your first table to get its QR code.</p>
-          </div>
-        ) : (
-          <div className="p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {tables.map((t) => (
-              <div key={t.id} className="rounded-xl p-3 text-center" style={{ border: "1px solid rgba(66,117,200,0.15)", background: "#FBFCFE" }}>
-                {qrImages[t.id] ? <img src={qrImages[t.id]} alt={`QR code for ${t.label}`} className="w-full aspect-square rounded-md" /> : <div className="w-full aspect-square" />}
-                <p className="mt-2 text-sm font-medium" style={{ color: "#1F2D4C" }}>{t.label}</p>
-                <div className="mt-2 flex justify-center gap-1.5">
-                  <button type="button" onClick={() => downloadQr(t)} disabled={!qrImages[t.id]} title="Download QR image" aria-label={`Download QR for ${t.label}`} className="p-2 rounded-lg" style={{ background: "rgba(66,117,200,0.1)", color: "#4275C8" }}><Download size={13} /></button>
-                  <button type="button" onClick={() => removeTable(t)} title="Remove table" aria-label={`Remove ${t.label}`} className="p-2 rounded-lg" style={{ background: "rgba(239,68,68,0.08)", color: "#dc2626" }}><Trash2 size={13} /></button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </section>
 
       {/* Uploads gallery */}
       <section className={`${card} overflow-hidden`} style={cardStyle}>
-        <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={{ borderBottom: "1px solid rgba(66,117,200,0.1)" }}>
-          <h2 className="text-lg font-medium" style={{ ...serif, color: "#1F2D4C" }}>Guest Uploads <span className="text-sm font-normal" style={{ color: "#6B7C9D" }}>({shown.length})</span></h2>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {["all", ...labels].map((l) => (
-              <button key={l} type="button" onClick={() => setTableFilter(l)} className="px-3 py-1.5 rounded-lg text-xs capitalize" style={chip(tableFilter === l)}>{l === "all" ? "All tables" : l}</button>
-            ))}
-            <button type="button" onClick={loadUploads} title="Refresh" aria-label="Refresh uploads" className="p-2 rounded-lg ml-1" style={{ background: "rgba(66,117,200,0.1)", color: "#4275C8" }}><RefreshCw size={13} className={loading ? "animate-spin" : ""} /></button>
-          </div>
+        <div className="p-5 flex items-center justify-between gap-3" style={{ borderBottom: "1px solid rgba(66,117,200,0.1)" }}>
+          <h2 className="text-lg font-medium" style={{ ...serif, color: "#1F2D4C" }}>Guest Uploads <span className="text-sm font-normal" style={{ color: "#6B7C9D" }}>({uploads.length})</span></h2>
+          <button type="button" onClick={loadUploads} title="Refresh" aria-label="Refresh uploads" className="p-2 rounded-lg" style={{ background: "rgba(66,117,200,0.1)", color: "#4275C8" }}><RefreshCw size={13} className={loading ? "animate-spin" : ""} /></button>
         </div>
-        {!loading && shown.length === 0 ? (
+        {!loading && uploads.length === 0 ? (
           <p className="py-12 text-center text-sm" style={{ color: "#9BB7E0" }}>No uploads yet. They'll appear here as guests share them.</p>
         ) : (
           <div className="p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {shown.map((u) => {
+            {uploads.map((u) => {
               const src = urls[u.file_path];
               const isVideo = u.file_type.startsWith("video/");
               return (
@@ -363,13 +299,13 @@ export function AdminUploadsPanel() {
                   <div className="aspect-square relative" style={{ background: "#E3EBF6" }}>
                     {src && (isVideo
                       ? <video src={`${src}#t=0.1`} controls preload="metadata" playsInline className="w-full h-full object-cover" />
-                      : <a href={src} target="_blank" rel="noreferrer"><img src={src} alt={`Upload from ${u.table_label}`} loading="lazy" className="w-full h-full object-cover" /></a>)}
+                      : <a href={src} target="_blank" rel="noreferrer"><img src={src} alt={`Upload from ${u.uploader_name || "a guest"}`} loading="lazy" className="w-full h-full object-cover" /></a>)}
                     {isVideo && <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] uppercase" style={{ background: "rgba(31,45,76,0.7)", color: "white", letterSpacing: "0.1em" }}>Video</span>}
                   </div>
                   <figcaption className="p-2.5 flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-xs font-medium truncate" style={{ color: "#1F2D4C" }}>{u.uploader_name || "Guest"}</p>
-                      <p className="text-[11px] truncate" style={{ color: "#6B7C9D" }}>{u.table_label} · {new Date(u.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · {formatBytes(u.file_size)}</p>
+                      <p className="text-[11px] truncate" style={{ color: "#6B7C9D" }}>{new Date(u.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · {formatBytes(u.file_size)}</p>
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
                       <button type="button" onClick={() => download(u)} title="Download" aria-label="Download" className="p-1.5 rounded-lg" style={{ background: "rgba(66,117,200,0.1)", color: "#4275C8" }}><Download size={12} /></button>
@@ -385,16 +321,12 @@ export function AdminUploadsPanel() {
 
       {createPortal(
         <div className="qr-print-root">
-          <div className="qr-print-grid">
-            {tables.map((t) => (
-              <div key={t.id} className="qr-print-card">
-                <p style={{ ...script, fontSize: 30, margin: 0, color: "#4275C8" }}>Share Your Moments</p>
-                <p style={{ ...serif, fontSize: 16, margin: "2mm 0 0" }}>{COUPLE}</p>
-                {qrImages[t.id] && <img src={qrImages[t.id]} alt="" />}
-                <p style={{ ...sans, fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", margin: 0, color: "#5A6A8A" }}>Scan to upload your photos &amp; videos</p>
-                <p style={{ ...serif, fontSize: 24, fontWeight: 600, margin: "3mm 0 0" }}>{t.label}</p>
-              </div>
-            ))}
+          <div className="qr-print-card">
+            <p style={{ ...script, fontSize: 40, margin: 0, color: "#4275C8" }}>Share Your Moments</p>
+            <p style={{ ...serif, fontSize: 20, margin: "3mm 0 0" }}>{COUPLE}</p>
+            {qrImage && <img src={qrImage} alt="" />}
+            <p style={{ ...sans, fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", margin: 0, color: "#5A6A8A" }}>Scan to upload your photos &amp; videos</p>
+            <p style={{ ...serif, fontSize: 14, fontStyle: "italic", margin: "3mm 0 0", color: "#5A6A8A" }}>{DATE_LINE}</p>
           </div>
         </div>,
         document.body,

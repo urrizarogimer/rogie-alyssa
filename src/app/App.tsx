@@ -1240,7 +1240,6 @@ const ENTOURAGE_PALETTE = [
   { name: "Powder Blue", hex: "#BFD7EA" },
   { name: "Beige", hex: "#D6C3A5" },
   { name: "Gray", hex: "#808080" },
-  { name: "Black", hex: "#1A1A1A" },
 ];
 
 const ATTIRE_ROLES: Record<AttireKey, AttireRole> = {
@@ -1272,6 +1271,7 @@ const GUEST_AVOID = [
   { name: "Blue Shades", hex: "#8FA7C6" },
   { name: "Gray", hex: "#808080" },
 ];
+
 
 const ATTIRE_TINT_STRENGTH = 0.38;
 

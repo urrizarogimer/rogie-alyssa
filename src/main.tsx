@@ -4,10 +4,11 @@
   import { GuestUploadPage } from "./app/GuestUploads.tsx";
   import "./styles/index.css";
 
-  // Table QR codes link to /?upload=<tableId>, which opens the guest upload page instead of the site.
-  const uploadTable = new URLSearchParams(window.location.search).get("upload");
+  // The guest QR code links to /?upload, which opens the upload page instead of the site.
+  // Older table codes (/?upload=<id>) land on the same page.
+  const isUploadPage = new URLSearchParams(window.location.search).has("upload");
 
   createRoot(document.getElementById("root")!).render(
-    uploadTable ? <GuestUploadPage tableId={Number(uploadTable)} /> : <App />
+    isUploadPage ? <GuestUploadPage /> : <App />
   );
   

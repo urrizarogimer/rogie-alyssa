@@ -6,12 +6,6 @@ export const UPLOAD_BUCKET = "guest-uploads";
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // Supabase free plan per-file limit
 export const SITE_URL = "https://rogiealyssawedding.vercel.app";
 
-export interface UploadTable {
-  id: number;
-  label: string;
-  created_at: string;
-}
-
 export interface GuestUpload {
   id: number;
   table_id: number | null;
@@ -24,13 +18,13 @@ export interface GuestUpload {
 }
 
 /**
- * The link a table's QR code points to. Always the public site: Vercel's per-deployment
- * URLs (…-urrizarogimers-projects.vercel.app) ask visitors to log in to Vercel, so a QR
- * made while the admin is open on one of those must not use the current address.
+ * The single link every guest's QR code points to. Always the public site: Vercel's
+ * per-deployment URLs (…-urrizarogimers-projects.vercel.app) ask visitors to log in.
  */
-export function uploadLinkFor(tableId: number): string {
-  return `${SITE_URL}/?upload=${tableId}`;
-}
+export const UPLOAD_LINK = `${SITE_URL}/?upload`;
+
+/** Label stored with each upload now that there is one shared QR code. */
+const GUEST_UPLOAD_LABEL = "Guests";
 
 export function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 MB";
@@ -39,60 +33,14 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
-// ─── Tables ────────────────────────────────────────────────────────────────────
-
-export async function fetchUploadTables(): Promise<UploadTable[]> {
-  try {
-    const { data, error } = await supabase.from("upload_tables").select("*").order("id", { ascending: true });
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error("Error fetching upload tables:", error);
-    return [];
-  }
-}
-
-export async function fetchUploadTable(id: number): Promise<UploadTable | null> {
-  try {
-    const { data, error } = await supabase.from("upload_tables").select("*").eq("id", id).maybeSingle();
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error("Error fetching upload table:", error);
-    return null;
-  }
-}
-
-export async function createUploadTable(label: string): Promise<UploadTable | null> {
-  try {
-    const { data, error } = await supabase.from("upload_tables").insert([{ label }]).select().single();
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error("Error creating upload table:", error);
-    return null;
-  }
-}
-
-export async function deleteUploadTable(id: number): Promise<boolean> {
-  try {
-    const { error } = await supabase.from("upload_tables").delete().eq("id", id);
-    if (error) throw error;
-    return true;
-  } catch (error) {
-    console.error("Error deleting upload table:", error);
-    return false;
-  }
-}
-
 // ─── Uploads ───────────────────────────────────────────────────────────────────
 
-function storagePathFor(table: UploadTable, file: File): string {
+function storagePathFor(file: File): string {
   const dot = file.name.lastIndexOf(".");
   const ext = dot > 0 ? file.name.slice(dot + 1).toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8) : "";
   const stem = (dot > 0 ? file.name.slice(0, dot) : file.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "file";
   const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  return `table-${table.id}/${unique}-${stem}${ext ? `.${ext}` : ""}`;
+  return `guests/${unique}-${stem}${ext ? `.${ext}` : ""}`;
 }
 
 /**
@@ -101,11 +49,10 @@ function storagePathFor(table: UploadTable, file: File): string {
  */
 export function uploadGuestFile(
   file: File,
-  table: UploadTable,
   uploaderName: string,
   onProgress: (fraction: number) => void,
 ): Promise<void> {
-  const path = storagePathFor(table, file);
+  const path = storagePathFor(file);
   const contentType = file.type || "application/octet-stream";
 
   return new Promise<void>((resolve, reject) => {
@@ -125,8 +72,8 @@ export function uploadGuestFile(
     xhr.send(file);
   }).then(async () => {
     const { error } = await supabase.from("guest_uploads").insert([{
-      table_id: table.id,
-      table_label: table.label,
+      table_id: null,
+      table_label: GUEST_UPLOAD_LABEL,
       uploader_name: uploaderName || null,
       file_path: path,
       file_type: contentType,
