@@ -23,11 +23,13 @@ export interface GuestUpload {
   created_at: string;
 }
 
-/** The link a table's QR code points to. Uses the live site when the admin is on localhost. */
+/**
+ * The link a table's QR code points to. Always the public site: Vercel's per-deployment
+ * URLs (…-urrizarogimers-projects.vercel.app) ask visitors to log in to Vercel, so a QR
+ * made while the admin is open on one of those must not use the current address.
+ */
 export function uploadLinkFor(tableId: number): string {
-  const { hostname, origin } = window.location;
-  const base = hostname === "localhost" || hostname === "127.0.0.1" ? SITE_URL : origin;
-  return `${base}/?upload=${tableId}`;
+  return `${SITE_URL}/?upload=${tableId}`;
 }
 
 export function formatBytes(bytes: number): string {
